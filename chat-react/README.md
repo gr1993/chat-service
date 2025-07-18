@@ -1,69 +1,31 @@
-# React + TypeScript + Vite
+# chat-react
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React를 사용해 간단한 채팅 기반 애플리케이션을 구현했으며, 기능 시연을 목적으로 제작했다.  
 
-Currently, two official plugins are available:
+<pre><code>```
+    └── components : 페이지에 사용되는 컴포넌트 정의
+    └── layout : 각 페이지에서 공통적으로 쓰이는 레이아웃
+    └── pages : URL 단위로 제작되는 페이지
+``` </code></pre>
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Expanding the ESLint configuration
+### 프론트 기술
+* Vite 7.0.5
+* typescript
+* react 19.1.0
+* react-router-dom
+* styled-components
+* Zustand : 전역 상태 관리
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### styled-components
+styled-components를 사용한 가장 큰 이유는 컴포넌트 간 CSS 충돌을 방지할 수 있기 때문이다. 모든 스타일은  
+고유한 해시 네임으로 컴파일되어, 다른 컴포넌트와 충돌하지 않는다. 또한 클래스명을 따로 지정할 필요가 없어  
+네이밍에 대한 고민도 줄어든다. 스타일과 로직이 하나의 파일에 함께 있어 유지보수가 쉬우며, 각 스타일이 해당  
+컴포넌트에만 종속되기 때문에 코드의 응집력이 높아진다.  
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Zustand
+이전에 사용해봤던 Redux로 전역 상태 관리를 고려해보았지만, 현재 프로젝트는 성능 테스트를 하기 위해 아주  
+간소화된 채팅 어플리케이션 기능만을 제공한다. Redux는 전역 상태 관리의 패턴을 강력하게 정의하고, 액션  
+리듀서, 디스패치 등과 같이 상태 변화의 흐름을 명확하게 만들기 위한 구조가 있다. 그래서 이 구조는 규모가  
+큰 프로젝트에 적합하다고 한다. 반면 Zustand는 훨씬 더 간단하고 상태를 설정하고 가져오는 것만으로 쉽게  
+전역 상태 관리를 할 수 있다. 작은 프로젝트에 적합하므로 Zustand를 사용하여 전역 상태 관리를 구현하였다.  
