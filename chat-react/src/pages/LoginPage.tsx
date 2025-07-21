@@ -1,16 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import FlexContainer from '@/components/common/FlexContainer';
 import RoundInput from '@/components/common/RoundInput';
 import PrimaryButton from '@/components/common/PrimaryButton';
-
-const Container = styled.div`
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
 
 const LoginBox = styled.form`
   width: 380px;
@@ -26,12 +19,12 @@ const LoginBox = styled.form`
 
 const LoginPage: React.FC = () => {
   return (
-    <Container>
+    <FlexContainer>
       <LoginBox>
         <RoundInput type="text" placeholder="아이디를 입력하세요" required />
         <PrimaryButton type="submit">입장</PrimaryButton>
       </LoginBox>
-    </Container>
+    </FlexContainer>
   );
 };
 

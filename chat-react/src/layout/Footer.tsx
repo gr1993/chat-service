@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 const StyledFooter = styled.footer`
   border-top: 1px solid #ddd;
+  padding: 10px 0px;
 `;
 
 const Footer: React.FC = () => {
