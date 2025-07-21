@@ -15,6 +15,7 @@ React를 사용해 간단한 채팅 기반 애플리케이션을 구현했으며
 * react 19.1.0
 * react-router-dom
 * styled-components
+    * 디자인 출처 : https://boseuleeee.tistory.com/51
 * Zustand : 전역 상태 관리
 
 ### styled-components

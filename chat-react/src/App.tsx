@@ -5,6 +5,7 @@ import { createGlobalStyle } from 'styled-components';
 
 import LoginPage from './pages/LoginPage';
 import ChatRooms from './pages/ChatRooms';
+import ChatView from './pages/ChatView';
 
 const GlobalStyle = createGlobalStyle`
   /* 기본 리셋 */
@@ -47,7 +48,7 @@ function App() {
     <>
       <GlobalStyle />
       <Layout>
-        <LoginPage />
+        <ChatView />
       </Layout>
     </>
   )
