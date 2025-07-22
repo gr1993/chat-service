@@ -7,9 +7,22 @@ interface UserState {
   logout: () => void
 }
 
-export const useUserStore = create<UserState>((set) => ({
-  isLoggedIn: false,
-  id: '',
-  login: (id: string) => set({ isLoggedIn: true, id }),
-  logout: () => set({ isLoggedIn: false, id: '' }),
-}))
+export const useUserStore = create<UserState>((set) => {
+  const savedUserId = localStorage.getItem('userId');
+  const savedIsLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+
+  return {
+    isLoggedIn: savedIsLoggedIn || false,
+    id: savedUserId || '',
+    login: (id: string) => {
+      set({ isLoggedIn: true, id });
+      localStorage.setItem('userId', id);
+      localStorage.setItem('isLoggedIn', 'true');
+    },
+    logout: () => {
+      set({ isLoggedIn: false, id: '' });
+      localStorage.removeItem('userId');
+      localStorage.removeItem('isLoggedIn');
+    },
+  };
+});
