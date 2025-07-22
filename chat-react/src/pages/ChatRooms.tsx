@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 
 import defaultProfile from '../assets/default-profile.png';
 import FlexContainer from '@/components/common/FlexContainer';
+
+import { useAppStore } from '@/store/useAppStore';
 
 const ChatRoom = styled.div`
   display: flex;
@@ -86,6 +88,12 @@ const ChatInfo = styled.div`
 
 
 const ChatRooms: React.FC = () => {
+  const { setHeaderInfo } = useAppStore();
+
+  useEffect(() => {
+    setHeaderInfo(true, "채팅방 목록");
+  }, []);
+
   return (
     <FlexContainer flexDirection="column" justifyContent="flex-start">
       <ChatRoom>

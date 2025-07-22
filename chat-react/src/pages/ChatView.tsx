@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 
 import FlexContainer from '@/components/common/FlexContainer';
+
+import { useAppStore } from '@/store/useAppStore';
 
 const ChatHistory = styled.div`
 	flex: 1;
@@ -65,6 +67,12 @@ const Message = styled.div`.
 
 
 const ChatView: React.FC = () => {
+	const { setHeaderInfo } = useAppStore();
+
+	useEffect(() => {
+		setHeaderInfo(true, "아무개");
+	}, []);
+
 	return (
 		<FlexContainer flexDirection="column">
 			<ChatHistory>

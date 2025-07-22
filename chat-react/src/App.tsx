@@ -4,6 +4,8 @@ import Layout from './layout/Layout';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { createGlobalStyle } from 'styled-components';
 
+import RequireAuth from './components/RequireAuth';
+
 import LoginPage from './pages/LoginPage';
 import ChatRooms from './pages/ChatRooms';
 import ChatView from './pages/ChatView';
@@ -52,8 +54,8 @@ function App() {
         <Layout>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/room" element={<ChatRooms />} />
-            <Route path="/chat" element={<ChatView />} />
+            <Route path="/room" element={<RequireAuth><ChatRooms /></RequireAuth>} />
+            <Route path="/chat" element={<RequireAuth><ChatView /></RequireAuth>} />
           </Routes>
         </Layout>
       </BrowserRouter>

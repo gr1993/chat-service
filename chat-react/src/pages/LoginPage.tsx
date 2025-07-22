@@ -5,7 +5,8 @@ import FlexContainer from '@/components/common/FlexContainer';
 import RoundInput from '@/components/common/RoundInput';
 import PrimaryButton from '@/components/common/PrimaryButton';
 
-import { useUserState } from '@/store/useUserStore';
+import { useUserStore } from '@/store/useUserStore';
+import { useAppStore } from '@/store/useAppStore';
 import { useNavigate } from 'react-router-dom';
 
 const LoginBox = styled.form`
@@ -22,11 +23,12 @@ const LoginBox = styled.form`
 
 const LoginPage: React.FC = () => {
   const [inputId, setInputId] = useState('');
-  const { isLoggedIn, login } = useUserState();
+  const { login } = useUserStore();
+  const { setHeaderInfo } = useAppStore();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isLoggedIn) navigate('/room');
+    setHeaderInfo(false, "로그인");
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
