@@ -1,6 +1,7 @@
 import React from 'react';
 import Layout from './layout/Layout';
 
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { createGlobalStyle } from 'styled-components';
 
 import LoginPage from './pages/LoginPage';
@@ -47,9 +48,15 @@ function App() {
   return (
     <>
       <GlobalStyle />
-      <Layout>
-        <ChatView />
-      </Layout>
+      <BrowserRouter>
+        <Layout>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/room" element={<ChatRooms />} />
+            <Route path="/chat" element={<ChatView />} />
+          </Routes>
+        </Layout>
+      </BrowserRouter>
     </>
   )
 }

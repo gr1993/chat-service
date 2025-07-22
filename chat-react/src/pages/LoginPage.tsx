@@ -5,6 +5,8 @@ import FlexContainer from '@/components/common/FlexContainer';
 import RoundInput from '@/components/common/RoundInput';
 import PrimaryButton from '@/components/common/PrimaryButton';
 
+import { useNavigate } from 'react-router-dom';
+
 const LoginBox = styled.form`
   width: 380px;
   background-color: #ffffff;
@@ -18,11 +20,17 @@ const LoginBox = styled.form`
 `;
 
 const LoginPage: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate('/room');
+  };
+
   return (
     <FlexContainer>
       <LoginBox>
         <RoundInput type="text" placeholder="아이디를 입력하세요" required />
-        <PrimaryButton type="submit">입장</PrimaryButton>
+        <PrimaryButton type="submit" onClick={handleClick}>입장</PrimaryButton>
       </LoginBox>
     </FlexContainer>
   );
