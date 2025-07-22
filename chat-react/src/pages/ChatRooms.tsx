@@ -95,7 +95,7 @@ const ChatRooms: React.FC = () => {
   }, []);
 
   return (
-    <FlexContainer flexDirection="column" justifyContent="flex-start">
+    <FlexContainer $flexDirection="column" $justifyContent="flex-start">
       <ChatRoom>
         <ProfileImg src={defaultProfile} alt="프로필 이미지" />
         <ChatInfo>

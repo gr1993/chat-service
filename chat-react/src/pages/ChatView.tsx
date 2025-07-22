@@ -74,7 +74,7 @@ const ChatView: React.FC = () => {
 	}, []);
 
 	return (
-		<FlexContainer flexDirection="column">
+		<FlexContainer $flexDirection="column">
 			<ChatHistory>
 				<Left>오늘 시민공원 근처에서 7시에 가능하신가요?</Left>
 				<Right>네 가능해요! 그때 봐요!</Right>
