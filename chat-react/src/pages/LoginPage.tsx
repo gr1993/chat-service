@@ -8,6 +8,9 @@ import PrimaryButton from '@/components/common/PrimaryButton';
 import { useUserStore } from '@/store/useUserStore';
 import { useAppStore } from '@/store/useAppStore';
 import { useNavigate } from 'react-router-dom';
+import { handleApiResponse } from '@/api/apiUtils';
+import { entryUser } from '@/api/user';
+
 
 const LoginBox = styled.form`
   width: 380px;
@@ -35,15 +38,21 @@ const LoginPage: React.FC = () => {
     setInputId(e.target.value);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputId) {
       alert('아이디를 입력하세요.');
       return;
     }
 
-    login(inputId);
-    navigate('/room');
+    // 사용자 입장 API
+    handleApiResponse(
+      entryUser(inputId),
+      () => {
+        login(inputId);
+        navigate('/room');
+      }
+    );
   };
 
   return (
