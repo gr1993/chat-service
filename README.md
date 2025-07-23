@@ -42,7 +42,7 @@ chat-bot를 통해 시뮬레이션 부하를 발생시키고 Prometheus, Grafana
     * 채팅방 생성은 REST API, 채팅방 생성 알림은 WebSocket
     * 첫 채팅방 목록 조회는 REST API, 실시간 채팅방 정보는 WebSocket
     * 채팅방 입장은 REST API, 채팅방 입장 알림은 WebSocket
-    * 채팅방 퇴장은 REST API, 채팅방 퇴장 알림은 WebSocket
+    * (미구현)채팅방 퇴장은 REST API, 채팅방 퇴장 알림은 WebSocket
 * 1:1 또는 그룹 채팅 기능
     * 채팅방 내 모든 실시간 활동(메시지, 입장/퇴장 알림 등)은 WebSocket
 
