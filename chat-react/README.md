@@ -20,6 +20,7 @@ React를 사용해 간단한 채팅 기반 애플리케이션을 구현했으며
 * styled-components
     * 디자인 출처 : https://boseuleeee.tistory.com/51
 * Zustand : 전역 상태 관리
+* WebSocket : sockjs-client, @stomp/stompjs
 
 ### styled-components
 styled-components를 사용한 가장 큰 이유는 컴포넌트 간 CSS 충돌을 방지할 수 있기 때문이다. 모든 스타일은  

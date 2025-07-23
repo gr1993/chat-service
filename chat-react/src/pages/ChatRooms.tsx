@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import SockJS from "sockjs-client";
+import { CompatClient, Stomp } from "@stomp/stompjs";
 
 import FlexContainer from '@/components/common/FlexContainer';
 import ChatRoom from '@/components/ChatRoom';
@@ -8,10 +10,12 @@ import { handleApiResponse } from '@/api/apiUtils';
 import type { ChatRoomInfo } from '@/api/types';
 import { getRoomList } from '@/api/chatRoom';
 
+const SOCKET_URL = import.meta.env.VITE_API_URL + '/ws';
 
 const ChatRooms: React.FC = () => {
   const [roomList, setRoomList] = useState<ChatRoomInfo[] | null>([]);
   const { setHeaderInfo } = useAppStore();
+  const stompClient = useRef<CompatClient | null>(null);
 
   useEffect(() => {
     setHeaderInfo(true, "채팅방 목록");
@@ -23,6 +27,26 @@ const ChatRooms: React.FC = () => {
         setRoomList(data);
       }
     );
+
+    // 웹소켓 연결
+    const socket = new SockJS(SOCKET_URL);
+    const client = Stomp.over(socket);
+
+    client.connect({}, () => {
+      // 채팅방 생성 구독
+      client.subscribe("/topic/rooms", (message) => {
+        const payload: ChatRoomInfo = JSON.parse(message.body);
+        setRoomList((prev) => [...(prev ?? []), payload]);
+      });
+    });
+
+    stompClient.current = client;
+
+    return () => {
+      client.disconnect(() => {
+        console.log("STOMP 연결 종료");
+      });
+    };
   }, []);
 
   return (
