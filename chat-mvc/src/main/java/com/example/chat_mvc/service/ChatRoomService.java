@@ -24,7 +24,7 @@ public class ChatRoomService {
     public List<ChatRoomInfo> getRoomList() {
         return chatRoomRepository.findAll()
                 .stream()
-                .map(r -> new ChatRoomInfo(r.getId(), r.getName()))
+                .map(ChatRoomInfo::new)
                 .toList();
     }
 
@@ -37,7 +37,7 @@ public class ChatRoomService {
         chatRoomRepository.save(newChatRoom);
 
         // 채팅방 생성을 구독자들에게 알림
-        messagingTemplate.convertAndSend("/topic/rooms", newChatRoom);
+        messagingTemplate.convertAndSend("/topic/rooms", new ChatRoomInfo(newChatRoom));
     }
 
 }
