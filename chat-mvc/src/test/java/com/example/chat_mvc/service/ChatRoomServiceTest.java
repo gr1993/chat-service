@@ -60,6 +60,6 @@ public class ChatRoomServiceTest {
 
         // then
         verify(chatRoomRepository).save(any(ChatRoom.class));
-        verify(messagingTemplate).convertAndSend(eq("/topic/rooms"), any(ChatRoom.class));
+        verify(messagingTemplate).convertAndSend(eq("/topic/rooms"), any(ChatRoomInfo.class));
     }
 }
