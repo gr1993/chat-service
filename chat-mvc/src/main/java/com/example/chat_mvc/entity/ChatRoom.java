@@ -14,7 +14,6 @@ public class ChatRoom {
     private List<User> userList;
     private List<ChatMessage> messagesList;
 
-    public ChatRoom() {}
     public ChatRoom(Long id, String name) {
         this.id = id;
         this.name = name;
