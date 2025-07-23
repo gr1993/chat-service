@@ -25,4 +25,8 @@ public class InMemoryChatRoomRepository implements ChatRoomRepository {
     public List<ChatRoom> findAll() {
         return new ArrayList<>(chatRoomList);
     }
+
+    public void clear() {
+        chatRoomList.clear();
+    }
 }
