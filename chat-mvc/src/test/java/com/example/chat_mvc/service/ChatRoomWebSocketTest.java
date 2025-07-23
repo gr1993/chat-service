@@ -52,7 +52,7 @@ public class ChatRoomWebSocketTest {
     }
 
     @Test
-    void 서버에서_채팅_생성_알림_받기() throws Exception {
+    void 서버에서_채팅방_생성_알림_받기() throws Exception {
         // given
         StompSession session = connectWebSocket();
         BlockingQueue<ChatRoomInfo> blockingQueue = new LinkedBlockingQueue<>();
