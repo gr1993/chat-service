@@ -15,6 +15,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -59,5 +60,6 @@ public class ChatRoomServiceTest {
 
         // then
         verify(chatRoomRepository).save(any(ChatRoom.class));
+        verify(messagingTemplate).convertAndSend(eq("/topic/rooms"), any(ChatRoom.class));
     }
 }
