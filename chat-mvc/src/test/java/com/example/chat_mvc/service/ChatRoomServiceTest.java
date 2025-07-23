@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.List;
 
@@ -25,6 +26,9 @@ public class ChatRoomServiceTest {
 
     @Mock
     private ChatRoomRepository chatRoomRepository;
+
+    @Mock
+    private SimpMessagingTemplate messagingTemplate;
 
 
     @Test
