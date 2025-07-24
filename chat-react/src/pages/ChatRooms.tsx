@@ -4,16 +4,19 @@ import { CompatClient, Stomp } from "@stomp/stompjs";
 
 import FlexContainer from '@/components/common/FlexContainer';
 import ChatRoom from '@/components/ChatRoom';
+import ChatRoomCreateModal from '@/components/ChatRoomCreateModal';
 
 import { useAppStore } from '@/store/useAppStore';
 import { handleApiResponse } from '@/api/apiUtils';
 import type { ChatRoomInfo } from '@/api/types';
-import { getRoomList } from '@/api/chatRoom';
+import { getRoomList, createRoom } from '@/api/chatRoom';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL + '/ws';
 
 const ChatRooms: React.FC = () => {
   const [roomList, setRoomList] = useState<ChatRoomInfo[] | null>([]);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
   const { setHeaderInfo } = useAppStore();
   const stompClient = useRef<CompatClient | null>(null);
 
@@ -49,11 +52,28 @@ const ChatRooms: React.FC = () => {
     };
   }, []);
 
+  const createChatRoom = (roomName: string) => {
+    // 전체 채팅방 생성 API
+    handleApiResponse(
+      createRoom(roomName),
+      () => {
+        setIsModalOpen(false);
+      }
+    );
+  }
+
+
   return (
     <FlexContainer $flexDirection="column" $justifyContent="flex-start">
       {roomList?.map((room) => (
         <ChatRoom key={room.roomId} room={room} />
       ))}
+      {isModalOpen && (
+        <ChatRoomCreateModal
+          onClose={() => setIsModalOpen(false)}
+          onCreate={createChatRoom}
+        />
+      )}
     </FlexContainer>
   );
 };

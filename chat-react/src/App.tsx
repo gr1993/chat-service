@@ -53,6 +53,7 @@ function App() {
       <BrowserRouter>
         <Layout>
           <Routes>
+            <Route path="/" element={<LoginPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/room" element={<RequireAuth><ChatRooms /></RequireAuth>} />
             <Route path="/chat" element={<RequireAuth><ChatView /></RequireAuth>} />
