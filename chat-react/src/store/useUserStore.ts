@@ -1,28 +1,27 @@
-import { create } from 'zustand'
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 interface UserState {
-  isLoggedIn: boolean
-  id: string
-  login: (id: string) => void
-  logout: () => void
+  isLoggedIn: boolean;
+  id: string;
+  login: (id: string) => void;
+  logout: () => void;
 }
 
-export const useUserStore = create<UserState>((set) => {
-  const savedUserId = localStorage.getItem('userId');
-  const savedIsLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-
-  return {
-    isLoggedIn: savedIsLoggedIn || false,
-    id: savedUserId || '',
-    login: (id: string) => {
-      set({ isLoggedIn: true, id });
-      localStorage.setItem('userId', id);
-      localStorage.setItem('isLoggedIn', 'true');
-    },
-    logout: () => {
-      set({ isLoggedIn: false, id: '' });
-      localStorage.removeItem('userId');
-      localStorage.removeItem('isLoggedIn');
-    },
-  };
-});
+export const useUserStore = create<UserState>()(
+  persist(
+    (set) => ({
+      isLoggedIn: false,
+      id: '',
+      login: (id) => set({ isLoggedIn: true, id }),
+      logout: () => set({ isLoggedIn: false, id: '' }),
+    }),
+    {
+      name: 'user-storage',
+      partialize: (state) => ({
+        isLoggedIn: state.isLoggedIn,
+        id: state.id,
+      }),
+    }
+  )
+);

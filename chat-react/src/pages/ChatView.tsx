@@ -5,6 +5,7 @@ import FlexContainer from '@/components/common/FlexContainer';
 import ChatMessage from '@/components/ChatMessage';
 
 import { useAppStore } from '@/store/useAppStore';
+import { useChatStore } from '@/store/useChatStore';
 import type { ChatMessageInfo } from '@/api/types';
 
 const ChatHistory = styled.div`
@@ -51,10 +52,11 @@ const MessageBox = styled.div`
 
 const ChatView: React.FC = () => {
   const { setHeaderInfo } = useAppStore();
+  const { currentRoom } = useChatStore();
   const [messageList, setMessageList] = useState<ChatMessageInfo[] | null>([]);
 
   useEffect(() => {
-    setHeaderInfo(true, "아무개");
+    setHeaderInfo(true, currentRoom?.name ?? '');
   }, []);
 
   return (

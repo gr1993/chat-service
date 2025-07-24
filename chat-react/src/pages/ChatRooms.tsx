@@ -7,6 +7,8 @@ import ChatRoom from '@/components/ChatRoom';
 import ChatRoomCreateModal from '@/components/ChatRoomCreateModal';
 
 import { useAppStore } from '@/store/useAppStore';
+import { useChatStore } from '@/store/useChatStore';
+import { useNavigate } from 'react-router-dom';
 import { handleApiResponse } from '@/api/apiUtils';
 import type { ChatRoomInfo } from '@/api/types';
 import { getRoomList, createRoom } from '@/api/chatRoom';
@@ -18,7 +20,9 @@ const ChatRooms: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const { setHeaderInfo } = useAppStore();
+  const { setCurrentRoom } = useChatStore();
   const stompClient = useRef<CompatClient | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setHeaderInfo(true, "채팅방 목록");
@@ -62,11 +66,15 @@ const ChatRooms: React.FC = () => {
     );
   }
 
+  const handleRoomClick = (room: ChatRoomInfo) => {
+    setCurrentRoom({ id: room.roomId, name: room.roomName });
+    navigate("/chat");
+  }
 
   return (
     <FlexContainer $flexDirection="column" $justifyContent="flex-start">
       {roomList?.map((room) => (
-        <ChatRoom key={room.roomId} room={room} />
+        <ChatRoom key={room.roomId} room={room} onClick={handleRoomClick} />
       ))}
       {isModalOpen && (
         <ChatRoomCreateModal

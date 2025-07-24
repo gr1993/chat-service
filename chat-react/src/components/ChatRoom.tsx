@@ -85,11 +85,12 @@ const ChatInfo = styled.div`
 
 type ChatRoomProps = {
   room: ChatRoomInfo;
+  onClick?: (room: ChatRoomInfo) => void;
 };
 
-const ChatRoom: React.FC<ChatRoomProps> = ({ room }) => {
+const ChatRoom: React.FC<ChatRoomProps> = ({ room, onClick }) => {
   return (
-    <ChatRoomContainer>
+    <ChatRoomContainer onClick={() => onClick?.(room)}>
       <ProfileImg src={defaultProfile} alt="프로필 이미지" />
       <ChatInfo>
         <NameLast>
