@@ -11,3 +11,12 @@ export type ChatRoomInfo = {
   lastMessage: string | null;
   lastDt: string | null;
 };
+
+export type ChatMessageInfo = {
+  id: string;
+  senderId?: string;
+  message: string;
+  sendDt: string;
+  type: 'message' | 'system';
+  position?: 'left' | 'right';
+};
