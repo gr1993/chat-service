@@ -3,6 +3,7 @@ package com.example.chat_mvc.service;
 import com.example.chat_mvc.dto.ChatMessageInfo;
 import com.example.chat_mvc.dto.ChatRoomInfo;
 import com.example.chat_mvc.entity.ChatRoom;
+import com.example.chat_mvc.entity.MessageType;
 import com.example.chat_mvc.entity.User;
 import com.example.chat_mvc.repository.ChatRoomRepository;
 import com.example.chat_mvc.repository.UserRepository;
@@ -18,6 +19,7 @@ import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.util.StringUtils;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 import org.springframework.web.socket.sockjs.client.SockJsClient;
@@ -28,8 +30,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -64,30 +65,17 @@ public class ChatRoomWebSocketTest {
     @Test
     void 서버에서_채팅방_생성_알림_받기() throws Exception {
         // given
-        StompSession session = connectWebSocket();
-        BlockingQueue<ChatRoomInfo> blockingQueue = new LinkedBlockingQueue<>();
-
-        session.subscribe("/topic/rooms", new StompFrameHandler() {
-            @Override
-            public Type getPayloadType(StompHeaders headers) {
-                return ChatRoomInfo.class;
-            }
-
-            @Override
-            public void handleFrame(StompHeaders headers, Object payload) {
-                blockingQueue.add((ChatRoomInfo) payload);
-            }
-        });
+        BlockingQueue<ChatRoomInfo> blockingQueue = getWebSocketQueue("/topic/rooms", ChatRoomInfo.class);
 
         // when
         String roomName = "park";
         chatRoomService.createRoom(roomName);
 
         // then
-        ChatRoomInfo receivedMessage = blockingQueue.poll(5, TimeUnit.SECONDS);
-        log.info("받은 메세지 객체 : {}", receivedMessage);
-        assertNotNull(receivedMessage);
-        assertEquals(roomName, receivedMessage.getRoomName());
+        ChatRoomInfo chatRoomInfo = blockingQueue.poll(5, TimeUnit.SECONDS);
+        log.info("받은 메세지 객체 : {}", chatRoomInfo);
+        assertNotNull(chatRoomInfo);
+        assertEquals(roomName, chatRoomInfo.getRoomName());
     }
 
     @Test
@@ -100,42 +88,56 @@ public class ChatRoomWebSocketTest {
         when(userRepository.findById(any()))
                 .thenReturn(Optional.of(new User(userId)));
 
-        StompSession session = connectWebSocket();
-        BlockingQueue<ChatMessageInfo> blockingQueue = new LinkedBlockingQueue<>();
-
-        session.subscribe("/topic/message/" + roomId, new StompFrameHandler() {
-            @Override
-            public Type getPayloadType(StompHeaders headers) {
-                return ChatMessageInfo.class;
-            }
-
-            @Override
-            public void handleFrame(StompHeaders headers, Object payload) {
-                blockingQueue.add((ChatMessageInfo) payload);
-            }
-        });
+        BlockingQueue<ChatMessageInfo> blockingQueue = getWebSocketQueue("/topic/message/" + roomId, ChatMessageInfo.class);
 
         // when
         chatRoomService.enterRoom(roomId, userId);
 
         // then
-        ChatMessageInfo receivedMessage = blockingQueue.poll(5, TimeUnit.SECONDS);
-        log.info("받은 메세지 객체 : {}", receivedMessage);
-        assertNotNull(receivedMessage);
-        assertEquals(userId, receivedMessage.getSenderId());
+        ChatMessageInfo chatMessageInfo = blockingQueue.poll(5, TimeUnit.SECONDS);
+        log.info("받은 메세지 객체 : {}", chatMessageInfo);
+        assertNotNull(chatMessageInfo);
+        assertNotNull(chatMessageInfo.getMessageId());
+        assertEquals(userId, chatMessageInfo.getSenderId());
+        assertTrue(StringUtils.hasText(chatMessageInfo.getMessage()));
+        assertTrue(StringUtils.hasText(chatMessageInfo.getSendDt()));
+        assertEquals(MessageType.system.name(), chatMessageInfo.getType());
     }
 
 
-    private StompSession connectWebSocket() throws ExecutionException, InterruptedException, TimeoutException {
-        return stompClient.connectAsync(
-                    URL,
-                    new StompSessionHandlerAdapter() {
-                        @Override
-                        public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
-                            log.info("웹소켓 연결 성공");
-                        }
-                    }
-                )
-                .get(1, TimeUnit.SECONDS);
+    private StompSession connectWebSocket() {
+        try {
+            return stompClient.connectAsync(
+                            URL,
+                            new StompSessionHandlerAdapter() {
+                                @Override
+                                public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
+                                    log.info("웹소켓 연결 성공");
+                                }
+                            }
+                    )
+                    .get(1, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new RuntimeException("웹소켓 연결 실패", e);
+        }
+    }
+
+    private <T> BlockingQueue<T> getWebSocketQueue (String destination, Class<T> clazz) {
+        BlockingQueue<T> blockingQueue = new LinkedBlockingQueue<>();
+
+        StompSession session = connectWebSocket();
+        session.subscribe(destination, new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return clazz;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                blockingQueue.add(clazz.cast(payload));
+            }
+        });
+
+        return blockingQueue;
     }
 }
