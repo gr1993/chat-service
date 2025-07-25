@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 import FlexContainer from '@/components/common/FlexContainer';
 import ChatMessage from '@/components/ChatMessage';
+import MessageBox from '@/components/MessageBox';
 
 import { useAppStore } from '@/store/useAppStore';
 import { useChatStore } from '@/store/useChatStore';
@@ -15,41 +16,6 @@ const ChatHistory = styled.div`
   background-color: #f9f9f9;
 `;
 
-const MessageInput = styled.input``;
-const SendInput = styled.button``;
-const MessageBox = styled.div`
-  display: flex;
-  padding: 15px 15px;
-  width: 100%;
-  background-color: #fff;
-  border-top: 1px solid #f0f0f0;
-
-  ${MessageInput} {
-    flex-grow: 1;
-    padding: 12px 15px;
-    border-radius: 25px;
-    border: 1px solid #ddd;
-    font-size: 16px;
-    outline: none;
-  }
-
-  ${SendInput} {
-    background-color: #4A90E2;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 25px;
-    color: white;
-    margin-left: 10px;
-    cursor: pointer;
-    font-size: 16px;
-
-    &:hover {
-      background-color: #357ABD;
-    }
-  }
-`;
-
-
 const ChatView: React.FC = () => {
   const { setHeaderInfo } = useAppStore();
   const { currentRoom } = useChatStore();
@@ -57,6 +23,9 @@ const ChatView: React.FC = () => {
 
   useEffect(() => {
     setHeaderInfo(true, currentRoom?.name ?? '');
+
+    // 채팅방 입장 알림 구독
+
   }, []);
 
   return (
@@ -67,10 +36,7 @@ const ChatView: React.FC = () => {
         ))}
       </ChatHistory>
 
-      <MessageBox>
-        <MessageInput type='text' placeholder='메시지를 입력하세요...'></MessageInput>
-        <SendInput>전송</SendInput>
-      </MessageBox>
+      <MessageBox onSend={(message) => { alert(message); }} />
     </FlexContainer>
   );
 };
