@@ -1,6 +1,9 @@
+import { useEffect } from 'react';
 import Layout from './layout/Layout';
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+import { connectWebSocket, disconnectWebSocket } from './common/socketClient';
 
 import GlobalStyle from './components/GlobalStyle'
 import RequireAuth from './components/RequireAuth';
@@ -10,6 +13,15 @@ import ChatRooms from './pages/ChatRooms';
 import ChatView from './pages/ChatView';
 
 function App() {
+
+  useEffect(() => {
+    connectWebSocket();
+
+     return () => {
+      disconnectWebSocket();
+    };
+  }, []);
+
   return (
     <>
       <GlobalStyle />

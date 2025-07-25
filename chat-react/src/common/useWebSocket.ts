@@ -1,35 +1,34 @@
 import { useEffect, useRef } from "react";
 import type { CompatClient } from "@stomp/stompjs";
-import { connectWebSocket, disconnectWebSocket } from "@/common/socketClient";
+import { getWebSocketClient } from "@/common/socketClient";
 
 export function useWebSocket(onConnect?: (client: CompatClient) => void) {
   const clientRef = useRef<CompatClient | null>(null);
-  const didConnect = useRef(false); 
+  const retryTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    let retryCount = 0;
+    const interval = 100;
 
-    if (didConnect.current) {
-      return;
+    const tryConnect = () => {
+       const client = getWebSocketClient();
+      if (client && client.connected) {
+        clientRef.current = client;
+        onConnect?.(client);
+      } else {
+        console.log('웹소켓 연결 대기')
+        retryCount++;
+        retryTimerRef.current = setTimeout(tryConnect, interval);
+      }
     }
 
-    didConnect.current = true;
-
-    const client = connectWebSocket((connectedClient) => {
-      clientRef.current = connectedClient;
-      onConnect?.(connectedClient);
-    });
-
-    if (client) {
-      clientRef.current = client;
-    }
+    tryConnect();
 
     return () => {
-      if (clientRef.current) {
-        disconnectWebSocket();
-        clientRef.current = null;
+      if (retryTimerRef.current) {
+        clearTimeout(retryTimerRef.current);
       }
     };
-    
   }, []);
 
   return clientRef;

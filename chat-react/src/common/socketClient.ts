@@ -27,6 +27,7 @@ export function disconnectWebSocket() {
   if (sharedClient?.connected) {
     sharedClient.disconnect(() => {
       console.log("STOMP 연결 종료");
+      sharedClient = null;
     });
   }
 }

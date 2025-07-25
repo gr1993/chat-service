@@ -32,18 +32,20 @@ const ChatView: React.FC = () => {
       const payload: ChatMessageInfo = JSON.parse(message.body);
       setMessageList((prev) => [...(prev ?? []), payload]);
     });
+
+    setTimeout(() => {
+      // 채팅방 입장 API
+      if (currentRoom) {
+        handleApiResponse(
+          enterRoom(currentRoom.id, userId),
+          () => {}
+        );
+      }
+    }, 100);
   });
 
   useEffect(() => {
     setHeaderInfo(true, currentRoom?.name ?? '');
-
-    // 채팅방 입장 API
-    if (currentRoom) {
-      handleApiResponse(
-        enterRoom(currentRoom.id, userId),
-        () => {}
-      );
-    }
   }, []);
 
   return (
