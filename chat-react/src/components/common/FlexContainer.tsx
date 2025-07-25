@@ -14,6 +14,7 @@ const FlexContainer = styled.div<FlexContainerProps>`
   justify-content: ${({ $justifyContent }) => $justifyContent || 'center'};
   align-items: ${({ $alignItems }) => $alignItems || 'center'};
   flex-direction: ${({ $flexDirection }) => $flexDirection || 'row'};
+  overflow-y: auto;
 `;
 
 export default FlexContainer;
