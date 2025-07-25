@@ -27,4 +27,10 @@ public class ChatRoomRestController {
         return ApiResponse.ok(null);
     }
 
+    @PostMapping("/{roomId}/enter")
+    public ApiResponse<Void> enterRoom(@PathVariable Long roomId, @RequestParam String userId) {
+        chatRoomService.enterRoom(roomId, userId);
+        return ApiResponse.ok(null);
+    }
+
 }

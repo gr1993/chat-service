@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @Repository
@@ -24,6 +25,13 @@ public class InMemoryChatRoomRepository implements ChatRoomRepository {
     @Override
     public List<ChatRoom> findAll() {
         return new ArrayList<>(chatRoomList);
+    }
+
+    @Override
+    public Optional<ChatRoom> findById(Long roomId) {
+        return chatRoomList.stream()
+                .filter(r -> roomId.equals(r.getId()) )
+                .findAny();
     }
 
     public void clear() {

@@ -1,7 +1,11 @@
 package com.example.chat_mvc.service;
 
 import com.example.chat_mvc.dto.ChatRoomInfo;
+import com.example.chat_mvc.dto.UserEnterInfo;
+import com.example.chat_mvc.entity.ChatRoom;
+import com.example.chat_mvc.entity.User;
 import com.example.chat_mvc.repository.ChatRoomRepository;
+import com.example.chat_mvc.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,10 +25,13 @@ import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
 import java.lang.reflect.Type;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -35,6 +42,9 @@ public class ChatRoomWebSocketTest {
 
     @MockitoBean
     private ChatRoomRepository chatRoomRepository;
+
+    @MockitoBean
+    private UserRepository userRepository;
 
     @LocalServerPort
     private int port;
@@ -79,6 +89,42 @@ public class ChatRoomWebSocketTest {
         assertNotNull(receivedMessage);
         assertEquals(roomName, receivedMessage.getRoomName());
     }
+
+    @Test
+    void 서버에서_채팅방_입장_알림_받기() throws Exception {
+        // given
+        Long roomId = 1L;
+        String userId = "kang";
+        when(chatRoomRepository.findById(any()))
+                .thenReturn(Optional.of(new ChatRoom(roomId, "park")));
+        when(userRepository.findById(any()))
+                .thenReturn(Optional.of(new User(userId)));
+
+        StompSession session = connectWebSocket();
+        BlockingQueue<UserEnterInfo> blockingQueue = new LinkedBlockingQueue<>();
+
+        session.subscribe("/topic/rooms/" + roomId + "/enter", new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return UserEnterInfo.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+                blockingQueue.add((UserEnterInfo) payload);
+            }
+        });
+
+        // when
+        chatRoomService.enterRoom(roomId, userId);
+
+        // then
+        UserEnterInfo receivedMessage = blockingQueue.poll(5, TimeUnit.SECONDS);
+        log.info("받은 메세지 객체 : {}", receivedMessage);
+        assertNotNull(receivedMessage);
+        assertEquals(userId, receivedMessage.getUserId());
+    }
+
 
     private StompSession connectWebSocket() throws ExecutionException, InterruptedException, TimeoutException {
         return stompClient.connectAsync(

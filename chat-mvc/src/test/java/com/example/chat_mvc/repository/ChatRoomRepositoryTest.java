@@ -1,6 +1,7 @@
 package com.example.chat_mvc.repository;
 
 import com.example.chat_mvc.entity.ChatRoom;
+import com.example.chat_mvc.entity.User;
 import com.example.chat_mvc.repository.impl.InMemoryChatRoomRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -56,5 +58,38 @@ public class ChatRoomRepositoryTest {
         // then
         assertFalse(roomList.isEmpty());
         assertEquals(2, roomList.size());
+    }
+
+    @Test
+    void findById_성공() {
+        // given
+        chatRoomRepository.save(new ChatRoom(1L, "park"));
+        chatRoomRepository.save(new ChatRoom(2L, "kang"));
+
+        // when
+        Optional<ChatRoom> roomOptional = chatRoomRepository.findById(2L);
+
+        // then
+        assertTrue(roomOptional.isPresent());
+        ChatRoom room = roomOptional.get();
+        assertEquals("kang", room.getName());
+    }
+
+    @Test
+    void update_성공() {
+        // given
+        chatRoomRepository.save(new ChatRoom(1L, "park"));
+        ChatRoom updateRoom = chatRoomRepository.findById(1L).orElse(null);
+
+        // when
+        User user = new User("kang");
+        updateRoom.getUserQueue().add(user);
+        chatRoomRepository.update(updateRoom);
+
+        // then
+        Optional<ChatRoom> roomOptional = chatRoomRepository.findById(1L);
+        assertTrue(roomOptional.isPresent());
+        ChatRoom room = roomOptional.get();
+        assertEquals(1, room.getUserQueue().size());
     }
 }
