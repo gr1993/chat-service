@@ -1,7 +1,7 @@
 package com.example.chat_mvc.service;
 
+import com.example.chat_mvc.dto.ChatMessageInfo;
 import com.example.chat_mvc.dto.ChatRoomInfo;
-import com.example.chat_mvc.dto.UserEnterInfo;
 import com.example.chat_mvc.entity.ChatRoom;
 import com.example.chat_mvc.entity.User;
 import com.example.chat_mvc.repository.ChatRoomRepository;
@@ -111,6 +111,6 @@ public class ChatRoomServiceTest {
 
         // then
         verify(chatRoomRepository).update(any(ChatRoom.class));
-        verify(messagingTemplate).convertAndSend(eq("/topic/rooms/" + roomId + "/enter"), any(UserEnterInfo.class));
+        verify(messagingTemplate).convertAndSend(eq("/topic/message/" + roomId), any(ChatMessageInfo.class));
     }
 }

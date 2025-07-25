@@ -1,7 +1,7 @@
 package com.example.chat_mvc.service;
 
+import com.example.chat_mvc.dto.ChatMessageInfo;
 import com.example.chat_mvc.dto.ChatRoomInfo;
-import com.example.chat_mvc.dto.UserEnterInfo;
 import com.example.chat_mvc.entity.ChatRoom;
 import com.example.chat_mvc.entity.User;
 import com.example.chat_mvc.repository.ChatRoomRepository;
@@ -101,17 +101,17 @@ public class ChatRoomWebSocketTest {
                 .thenReturn(Optional.of(new User(userId)));
 
         StompSession session = connectWebSocket();
-        BlockingQueue<UserEnterInfo> blockingQueue = new LinkedBlockingQueue<>();
+        BlockingQueue<ChatMessageInfo> blockingQueue = new LinkedBlockingQueue<>();
 
-        session.subscribe("/topic/rooms/" + roomId + "/enter", new StompFrameHandler() {
+        session.subscribe("/topic/message/" + roomId, new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
-                return UserEnterInfo.class;
+                return ChatMessageInfo.class;
             }
 
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
-                blockingQueue.add((UserEnterInfo) payload);
+                blockingQueue.add((ChatMessageInfo) payload);
             }
         });
 
@@ -119,10 +119,10 @@ public class ChatRoomWebSocketTest {
         chatRoomService.enterRoom(roomId, userId);
 
         // then
-        UserEnterInfo receivedMessage = blockingQueue.poll(5, TimeUnit.SECONDS);
+        ChatMessageInfo receivedMessage = blockingQueue.poll(5, TimeUnit.SECONDS);
         log.info("받은 메세지 객체 : {}", receivedMessage);
         assertNotNull(receivedMessage);
-        assertEquals(userId, receivedMessage.getUserId());
+        assertEquals(userId, receivedMessage.getSenderId());
     }
 
 
