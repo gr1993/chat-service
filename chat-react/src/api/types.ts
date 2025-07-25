@@ -13,7 +13,7 @@ export type ChatRoomInfo = {
 };
 
 export type ChatMessageInfo = {
-  id: string;
+  messageId: string;
   senderId?: string;
   message: string;
   sendDt: string;

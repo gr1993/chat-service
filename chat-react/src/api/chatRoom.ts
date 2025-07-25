@@ -22,3 +22,19 @@ export const createRoom = async (name: string): Promise<ApiResponse<null>> => {
   );
   return res.data;
 };
+
+export const enterRoom = async (roomId: number, userId: string): Promise<ApiResponse<null>> => {
+   const form = new URLSearchParams();
+  form.append('userId', userId);
+
+  const res: AxiosResponse<ApiResponse<null>> = await axios.post<ApiResponse<null>>(
+    `/api/room/${roomId}/enter`, 
+    form,
+    {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    }
+  );
+  return res.data;
+};

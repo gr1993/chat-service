@@ -6,8 +6,12 @@ import ChatMessage from '@/components/ChatMessage';
 import MessageBox from '@/components/MessageBox';
 
 import { useAppStore } from '@/store/useAppStore';
+import { useUserStore } from '@/store/useUserStore';
 import { useChatStore } from '@/store/useChatStore';
+import { useWebSocket } from '@/common/useWebSocket';
+import { handleApiResponse } from '@/api/apiUtils';
 import type { ChatMessageInfo } from '@/api/types';
+import { enterRoom } from '@/api/chatRoom';
 
 const ChatHistory = styled.div`
   flex: 1;
@@ -19,20 +23,34 @@ const ChatHistory = styled.div`
 const ChatView: React.FC = () => {
   const { setHeaderInfo } = useAppStore();
   const { currentRoom } = useChatStore();
+  const { id: userId } = useUserStore();
   const [messageList, setMessageList] = useState<ChatMessageInfo[] | null>([]);
+
+  // 채팅방 메세지, 입장, 퇴장 정보 구독
+  useWebSocket((client) => {
+    client.subscribe(`/topic/message/${currentRoom?.id}`, (message) => {
+      const payload: ChatMessageInfo = JSON.parse(message.body);
+      setMessageList((prev) => [...(prev ?? []), payload]);
+    });
+  });
 
   useEffect(() => {
     setHeaderInfo(true, currentRoom?.name ?? '');
 
-    // 채팅방 입장 알림 구독
-
+    // 채팅방 입장 API
+    if (currentRoom) {
+      handleApiResponse(
+        enterRoom(currentRoom.id, userId),
+        () => {}
+      );
+    }
   }, []);
 
   return (
     <FlexContainer $flexDirection="column">
       <ChatHistory>
         {messageList?.map((message) => (
-          <ChatMessage key={message.id} message={message} />
+          <ChatMessage key={message.messageId} message={message} />
         ))}
       </ChatHistory>
 
