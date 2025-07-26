@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import Layout from './layout/Layout';
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
@@ -12,14 +12,21 @@ import LoginPage from './pages/LoginPage';
 import ChatRooms from './pages/ChatRooms';
 import ChatView from './pages/ChatView';
 
+const ESCAPE_STRICT_MODE = import.meta.env.VITE_ESCAPE_STRICT_MODE;
+
 function App() {
+  const isMounted = useRef(false);
 
   useEffect(() => {
-    connectWebSocket();
+    if (ESCAPE_STRICT_MODE !== 'Y' || isMounted.current) {
+      connectWebSocket();
 
-     return () => {
-      disconnectWebSocket();
-    };
+      return () => {
+        disconnectWebSocket();
+      };
+    } else {
+      isMounted.current = true;
+    }
   }, []);
 
   return (
