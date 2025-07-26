@@ -5,7 +5,10 @@ React를 사용해 간단한 채팅 기반 애플리케이션을 구현했으며
 <pre><code>```
   [src]
     └── api : REST API 호출 로직
+    └── assets : 앱이 사용하는 정적 리소스
+    └── common : 공통 모듈 정의
     └── components : 페이지에 사용되는 컴포넌트 정의
+    └── hooks : 커스텀 훅 정의
     └── layout : 각 페이지에서 공통적으로 쓰이는 레이아웃
     └── pages : URL 단위로 제작되는 페이지
     └── store : 전역 상태 관리 스토어
