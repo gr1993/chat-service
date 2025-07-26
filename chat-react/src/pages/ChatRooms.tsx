@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { handleApiResponse } from '@/api/apiUtils';
 import type { ChatRoomInfo } from '@/api/types';
 import { getRoomList, createRoom } from '@/api/chatRoom';
-import { useWebSocket } from '@/common/useWebSocket';
+import { useWebSocket } from '@/hooks/useWebSocket';
 
 const ChatRooms: React.FC = () => {
   const [roomList, setRoomList] = useState<ChatRoomInfo[] | null>([]);

@@ -8,7 +8,7 @@ import MessageBox from '@/components/MessageBox';
 import { useAppStore } from '@/store/useAppStore';
 import { useUserStore } from '@/store/useUserStore';
 import { useChatStore } from '@/store/useChatStore';
-import { useWebSocket } from '@/common/useWebSocket';
+import { useWebSocket } from '@/hooks/useWebSocket';
 import { handleApiResponse } from '@/api/apiUtils';
 import type { ChatMessageInfo } from '@/api/types';
 import { enterRoom } from '@/api/chatRoom';
