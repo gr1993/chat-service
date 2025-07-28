@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum MessageType {
-    message("사용자"),
+    user("사용자"),
     system("시스템");
 
     private final String description;

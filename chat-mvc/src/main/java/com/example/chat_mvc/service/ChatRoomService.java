@@ -1,9 +1,7 @@
 package com.example.chat_mvc.service;
 
-import com.example.chat_mvc.dto.ChatMessageInfo;
 import com.example.chat_mvc.dto.ChatRoomInfo;
 import com.example.chat_mvc.entity.ChatRoom;
-import com.example.chat_mvc.entity.MessageType;
 import com.example.chat_mvc.entity.User;
 import com.example.chat_mvc.repository.ChatRoomRepository;
 import com.example.chat_mvc.repository.UserRepository;
@@ -11,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -19,6 +16,7 @@ import java.util.concurrent.atomic.AtomicLong;
 @RequiredArgsConstructor
 public class ChatRoomService {
 
+    private final ChatMessageService chatMessageService;
     private final SimpMessagingTemplate messagingTemplate;
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
@@ -58,13 +56,8 @@ public class ChatRoomService {
         chatRoomRepository.update(room);
 
         // 채팅방에 사용자 입장을 구독자들에게 알림
-        ChatMessageInfo messageInfo = new ChatMessageInfo();
-        messageInfo.setMessageId(1L);
-        messageInfo.setSenderId(user.getId());
-        messageInfo.setMessage(messageInfo.getSenderId() + "님이 입장하셨습니다.");
-        messageInfo.setSendDt(LocalDateTime.now().toString());
-        messageInfo.setType(MessageType.system.name());
-        messagingTemplate.convertAndSend("/topic/message/" + roomId, messageInfo);
+        String msg = userId + "님이 입장하셨습니다.";
+        chatMessageService.broadcastSystemMsg(room, userId, msg);
     }
 
     /**
@@ -79,13 +72,8 @@ public class ChatRoomService {
         chatRoomRepository.update(room);
 
         // 채팅방에 사용자 퇴장을 구독자들에게 알림
-        ChatMessageInfo messageInfo = new ChatMessageInfo();
-        messageInfo.setMessageId(1L);
-        messageInfo.setSenderId(user.getId());
-        messageInfo.setMessage(messageInfo.getSenderId() + "님이 퇴장하셨습니다.");
-        messageInfo.setSendDt(LocalDateTime.now().toString());
-        messageInfo.setType(MessageType.system.name());
-        messagingTemplate.convertAndSend("/topic/message/" + roomId, messageInfo);
+        String msg = userId + "님이 퇴장하셨습니다.";
+        chatMessageService.broadcastSystemMsg(room, userId, msg);
     }
 
     private RoomUser validateRoomAndUser(Long roomId, String userId) {

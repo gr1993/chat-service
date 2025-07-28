@@ -1,6 +1,5 @@
 package com.example.chat_mvc.service;
 
-import com.example.chat_mvc.dto.ChatMessageInfo;
 import com.example.chat_mvc.dto.ChatRoomInfo;
 import com.example.chat_mvc.entity.ChatRoom;
 import com.example.chat_mvc.entity.User;
@@ -27,6 +26,9 @@ public class ChatRoomServiceTest {
 
     @InjectMocks
     private ChatRoomService chatRoomService;
+
+    @Mock
+    private ChatMessageService chatMessageService;
 
     @Mock
     private ChatRoomRepository chatRoomRepository;
@@ -111,7 +113,7 @@ public class ChatRoomServiceTest {
 
         // then
         verify(chatRoomRepository).update(any(ChatRoom.class));
-        verify(messagingTemplate).convertAndSend(eq("/topic/message/" + roomId), any(ChatMessageInfo.class));
+        verify(chatMessageService).broadcastSystemMsg(any(), any(), any());
     }
 
     @Test
@@ -128,6 +130,6 @@ public class ChatRoomServiceTest {
 
         // then
         verify(chatRoomRepository).update(any(ChatRoom.class));
-        verify(messagingTemplate).convertAndSend(eq("/topic/message/" + roomId), any(ChatMessageInfo.class));
+        verify(chatMessageService).broadcastSystemMsg(any(), any(), any());
     }
 }
