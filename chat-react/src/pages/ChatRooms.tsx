@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+import type { IMessage } from '@stomp/stompjs';
+
 import FlexContainer from '@/components/common/FlexContainer';
 import ChatRoom from '@/components/ChatRoom';
 import ChatRoomCreateModal from '@/components/ChatRoomCreateModal';
@@ -10,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { handleApiResponse } from '@/api/apiUtils';
 import type { ChatRoomInfo } from '@/api/types';
 import { getRoomList, createRoom } from '@/api/chatRoom';
-import { useWebSocket } from '@/hooks/useWebSocket';
+import { useChatSubscribe } from '@/hooks/useChatSubscribe';
 
 const ChatRooms: React.FC = () => {
   const [roomList, setRoomList] = useState<ChatRoomInfo[] | null>([]);
@@ -21,13 +23,11 @@ const ChatRooms: React.FC = () => {
   const navigate = useNavigate();
 
   // 채팅방 생성 구독
-  useWebSocket((client) => {
-    client.subscribe("/topic/rooms", (message) => {
-      const payload: ChatRoomInfo = JSON.parse(message.body);
-      setRoomList((prev) => [...(prev ?? []), payload]);
-    });
+  useChatSubscribe("/topic/rooms", (message: IMessage) => {
+    const payload: ChatRoomInfo = JSON.parse(message.body);
+    setRoomList((prev) => [...(prev ?? []), payload]);
   });
-
+  
   useEffect(() => {
     setHeaderInfo(true, "채팅방 목록");
 

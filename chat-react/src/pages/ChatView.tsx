@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
+
+import type { IMessage } from '@stomp/stompjs';
 
 import FlexContainer from '@/components/common/FlexContainer';
 import ChatMessage from '@/components/ChatMessage';
@@ -8,7 +10,8 @@ import MessageBox from '@/components/MessageBox';
 import { useAppStore } from '@/store/useAppStore';
 import { useUserStore } from '@/store/useUserStore';
 import { useChatStore } from '@/store/useChatStore';
-import { useWebSocket } from '@/hooks/useWebSocket';
+import { useChatSubscribe } from '@/hooks/useChatSubscribe';
+import { useStrictEffect } from '@/hooks/useStrictEffect';
 import { handleApiResponse } from '@/api/apiUtils';
 import type { ChatMessageInfo } from '@/api/types';
 import { enterRoom } from '@/api/chatRoom';
@@ -27,11 +30,13 @@ const ChatView: React.FC = () => {
   const [messageList, setMessageList] = useState<ChatMessageInfo[] | null>([]);
 
   // 채팅방 메세지, 입장, 퇴장 정보 구독
-  useWebSocket((client) => {
-    client.subscribe(`/topic/message/${currentRoom?.id}`, (message) => {
-      const payload: ChatMessageInfo = JSON.parse(message.body);
-      setMessageList((prev) => [...(prev ?? []), payload]);
-    });
+  useChatSubscribe(`/topic/message/${currentRoom?.id}`, (message: IMessage) => {
+    const payload: ChatMessageInfo = JSON.parse(message.body);
+    setMessageList((prev) => [...(prev ?? []), payload]);
+  });
+
+  useStrictEffect(() => {
+    setHeaderInfo(true, currentRoom?.name ?? '');
 
     setTimeout(() => {
       // 채팅방 입장 API
@@ -42,10 +47,6 @@ const ChatView: React.FC = () => {
         );
       }
     }, 100);
-  });
-
-  useEffect(() => {
-    setHeaderInfo(true, currentRoom?.name ?? '');
   }, []);
 
   return (
