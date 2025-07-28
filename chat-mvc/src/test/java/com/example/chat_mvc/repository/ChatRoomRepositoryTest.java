@@ -82,14 +82,15 @@ public class ChatRoomRepositoryTest {
         ChatRoom updateRoom = chatRoomRepository.findById(1L).orElse(null);
 
         // when
-        User user = new User("kang");
-        updateRoom.getUserQueue().add(user);
+        String userId = "kang";
+        User user = new User(userId);
+        updateRoom.getUserMap().put(userId, user);
         chatRoomRepository.update(updateRoom);
 
         // then
         Optional<ChatRoom> roomOptional = chatRoomRepository.findById(1L);
         assertTrue(roomOptional.isPresent());
         ChatRoom room = roomOptional.get();
-        assertEquals(1, room.getUserQueue().size());
+        assertEquals(1, room.getUserMap().size());
     }
 }

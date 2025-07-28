@@ -63,7 +63,7 @@ public class ChatRoomService {
 
         ChatRoom room = roomOptional.get();
         User user = userOptional.get();
-        room.getUserQueue().add(user);
+        room.getUserMap().put(user.getId(), user);
         chatRoomRepository.update(room);
 
         // 채팅방에 사용자 입장을 구독자들에게 알림
