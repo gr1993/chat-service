@@ -1,7 +1,9 @@
 package com.example.chat_mvc.controller;
 
+import com.example.chat_mvc.common.RoomUserSessionManager;
 import com.example.chat_mvc.dto.ApiResponse;
 import com.example.chat_mvc.dto.ChatRoomInfo;
+import com.example.chat_mvc.dto.WebSocketRoomUser;
 import com.example.chat_mvc.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,7 @@ import java.util.List;
 public class ChatRoomRestController {
 
     private final ChatRoomService chatRoomService;
+    private final RoomUserSessionManager roomUserSessionManager;
 
     @GetMapping
     public ApiResponse<List<ChatRoomInfo>> getRoomList() {
@@ -28,7 +31,13 @@ public class ChatRoomRestController {
     }
 
     @PostMapping("/{roomId}/enter")
-    public ApiResponse<Void> enterRoom(@PathVariable Long roomId, @RequestParam String userId) {
+    public ApiResponse<Void> enterRoom(
+            @PathVariable Long roomId,
+            @RequestParam String userId,
+            @RequestHeader("X-Session-Id") String sessionId) {
+
+        roomUserSessionManager.addRoomUserSession(sessionId, new WebSocketRoomUser(roomId, userId));
+
         chatRoomService.enterRoom(roomId, userId);
         return ApiResponse.ok(null);
     }
