@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
-import type { IMessage } from '@stomp/stompjs';
+import type { CompatClient, IMessage } from '@stomp/stompjs';
+import { getWebSocketClient } from '@/common/socketClient';
 
 import FlexContainer from '@/components/common/FlexContainer';
 import ChatMessage from '@/components/ChatMessage';
@@ -60,6 +61,22 @@ const ChatView: React.FC = () => {
     }
   }, []);
 
+  const sendMessageBtnClick = (message: string) => {
+    // 메세지 전송 웹소켓 API
+    const client: CompatClient | null = getWebSocketClient();
+    if (client == null) return;
+
+    client.send(
+      '/api/messages',
+      {},
+      JSON.stringify({
+        roomId: currentRoom?.id,
+        userId,
+        message,
+      })
+    );
+  }
+
   return (
     <FlexContainer $flexDirection="column">
       <ChatHistory>
@@ -68,7 +85,7 @@ const ChatView: React.FC = () => {
         ))}
       </ChatHistory>
 
-      <MessageBox onSend={(message) => { alert(message); }} />
+      <MessageBox onSend={sendMessageBtnClick} />
     </FlexContainer>
   );
 };
