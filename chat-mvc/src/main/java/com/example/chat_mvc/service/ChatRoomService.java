@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Service
@@ -51,18 +50,10 @@ public class ChatRoomService {
      * 채팅방에 입장
      */
     public void enterRoom(Long roomId, String userId) {
-        Optional<ChatRoom> roomOptional = chatRoomRepository.findById(roomId);
-        if (roomOptional.isEmpty()) {
-            throw new IllegalArgumentException("존재하지 않은 채팅방입니다.");
-        }
+        RoomUser ru = validateRoomAndUser(roomId, userId);
 
-        Optional<User> userOptional = userRepository.findById(userId);
-        if (userOptional.isEmpty()) {
-            throw new IllegalArgumentException("존재하지 않은 사용자입니다.");
-        }
-
-        ChatRoom room = roomOptional.get();
-        User user = userOptional.get();
+        ChatRoom room = ru.room();
+        User user = ru.user();
         room.getUserMap().put(user.getId(), user);
         chatRoomRepository.update(room);
 
@@ -75,5 +66,38 @@ public class ChatRoomService {
         messageInfo.setType(MessageType.system.name());
         messagingTemplate.convertAndSend("/topic/message/" + roomId, messageInfo);
     }
+
+    /**
+     * 채팅방에서 퇴장
+     */
+    public void exitRoom(Long roomId, String userId) {
+        RoomUser ru = validateRoomAndUser(roomId, userId);
+
+        ChatRoom room = ru.room();
+        User user = ru.user();
+        room.getUserMap().remove(user.getId());
+        chatRoomRepository.update(room);
+
+        // 채팅방에 사용자 퇴장을 구독자들에게 알림
+        ChatMessageInfo messageInfo = new ChatMessageInfo();
+        messageInfo.setMessageId(1L);
+        messageInfo.setSenderId(user.getId());
+        messageInfo.setMessage(messageInfo.getSenderId() + "님이 퇴장하셨습니다.");
+        messageInfo.setSendDt(LocalDateTime.now().toString());
+        messageInfo.setType(MessageType.system.name());
+        messagingTemplate.convertAndSend("/topic/message/" + roomId, messageInfo);
+    }
+
+    private RoomUser validateRoomAndUser(Long roomId, String userId) {
+        ChatRoom room = chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않은 채팅방입니다."));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않은 사용자입니다."));
+
+        return new RoomUser(room, user);
+    }
+
+    private record RoomUser(ChatRoom room, User user) {}
 
 }

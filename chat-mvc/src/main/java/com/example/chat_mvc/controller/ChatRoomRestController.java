@@ -33,4 +33,9 @@ public class ChatRoomRestController {
         return ApiResponse.ok(null);
     }
 
+    @PostMapping("/{roomId}/exit")
+    public ApiResponse<Void> exitRoom(@PathVariable Long roomId, @RequestParam String userId) {
+        chatRoomService.exitRoom(roomId, userId);
+        return ApiResponse.ok(null);
+    }
 }

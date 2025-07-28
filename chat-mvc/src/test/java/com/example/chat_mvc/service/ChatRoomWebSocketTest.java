@@ -18,6 +18,7 @@ import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
@@ -29,6 +30,7 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.*;
+import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,6 +38,7 @@ import static org.mockito.Mockito.when;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ChatRoomWebSocketTest {
 
     @Autowired
@@ -80,28 +83,16 @@ public class ChatRoomWebSocketTest {
 
     @Test
     void 서버에서_채팅방_입장_알림_받기() throws Exception {
-        // given
-        Long roomId = 1L;
-        String userId = "kang";
-        when(chatRoomRepository.findById(any()))
-                .thenReturn(Optional.of(new ChatRoom(roomId, "park")));
-        when(userRepository.findById(any()))
-                .thenReturn(Optional.of(new User(userId)));
+        roomWebSocketSubscribeTest((roomId, userId) -> {
+            chatRoomService.enterRoom(roomId, userId);
+        });
+    }
 
-        BlockingQueue<ChatMessageInfo> blockingQueue = getWebSocketQueue("/topic/message/" + roomId, ChatMessageInfo.class);
-
-        // when
-        chatRoomService.enterRoom(roomId, userId);
-
-        // then
-        ChatMessageInfo chatMessageInfo = blockingQueue.poll(5, TimeUnit.SECONDS);
-        log.info("받은 메세지 객체 : {}", chatMessageInfo);
-        assertNotNull(chatMessageInfo);
-        assertNotNull(chatMessageInfo.getMessageId());
-        assertEquals(userId, chatMessageInfo.getSenderId());
-        assertTrue(StringUtils.hasText(chatMessageInfo.getMessage()));
-        assertTrue(StringUtils.hasText(chatMessageInfo.getSendDt()));
-        assertEquals(MessageType.system.name(), chatMessageInfo.getType());
+    @Test
+    void 서버에서_채팅방_퇴장_알림_받기() throws Exception {
+        roomWebSocketSubscribeTest((roomId, userId) -> {
+            chatRoomService.exitRoom(roomId, userId);
+        });
     }
 
 
@@ -122,7 +113,7 @@ public class ChatRoomWebSocketTest {
         }
     }
 
-    private <T> BlockingQueue<T> getWebSocketQueue (String destination, Class<T> clazz) {
+    private <T> BlockingQueue<T> getWebSocketQueue(String destination, Class<T> clazz) {
         BlockingQueue<T> blockingQueue = new LinkedBlockingQueue<>();
 
         StompSession session = connectWebSocket();
@@ -139,5 +130,30 @@ public class ChatRoomWebSocketTest {
         });
 
         return blockingQueue;
+    }
+
+    private void roomWebSocketSubscribeTest(BiConsumer<Long, String> consumer) throws Exception {
+        // given
+        Long roomId = 1L;
+        String userId = "kang";
+        when(chatRoomRepository.findById(any()))
+                .thenReturn(Optional.of(new ChatRoom(roomId, "park")));
+        when(userRepository.findById(any()))
+                .thenReturn(Optional.of(new User(userId)));
+
+        BlockingQueue<ChatMessageInfo> blockingQueue = getWebSocketQueue("/topic/message/" + roomId, ChatMessageInfo.class);
+
+        // when
+        consumer.accept(roomId, userId);
+
+        // then
+        ChatMessageInfo chatMessageInfo = blockingQueue.poll(5, TimeUnit.SECONDS);
+        log.info("받은 메세지 객체 : {}", chatMessageInfo);
+        assertNotNull(chatMessageInfo);
+        assertNotNull(chatMessageInfo.getMessageId());
+        assertEquals(userId, chatMessageInfo.getSenderId());
+        assertTrue(StringUtils.hasText(chatMessageInfo.getMessage()));
+        assertTrue(StringUtils.hasText(chatMessageInfo.getSendDt()));
+        assertEquals(MessageType.system.name(), chatMessageInfo.getType());
     }
 }

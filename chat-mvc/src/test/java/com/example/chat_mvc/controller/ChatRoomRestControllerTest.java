@@ -88,4 +88,28 @@ public class ChatRoomRestControllerTest {
 
         verify(chatRoomService).enterRoom(roomId, userId);
     }
+
+    @Test
+    void exitRoom_성공() throws Exception {
+        //given
+        Long roomId = 1L;
+        String userId = "park";
+
+        //when
+        ResultActions mvcAction = mockMvc.perform(
+                post("/api/room/" + roomId + "/exit")
+                        .param("userId", userId)
+        );
+
+        //then
+        mvcAction
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("요청 성공"))
+                .andExpect(jsonPath("$.data").doesNotExist())
+                .andDo(print())
+                .andReturn();
+
+        verify(chatRoomService).exitRoom(roomId, userId);
+    }
 }

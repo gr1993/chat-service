@@ -113,4 +113,21 @@ public class ChatRoomServiceTest {
         verify(chatRoomRepository).update(any(ChatRoom.class));
         verify(messagingTemplate).convertAndSend(eq("/topic/message/" + roomId), any(ChatMessageInfo.class));
     }
+
+    @Test
+    void exitRoom_성공() {
+        // given
+        Long roomId = 1L;
+        when(chatRoomRepository.findById(any()))
+                .thenReturn(Optional.of(new ChatRoom(roomId, "park")));
+        when(userRepository.findById(any()))
+                .thenReturn(Optional.of(new User("kang")));
+
+        // when
+        chatRoomService.exitRoom(1L, "kang");
+
+        // then
+        verify(chatRoomRepository).update(any(ChatRoom.class));
+        verify(messagingTemplate).convertAndSend(eq("/topic/message/" + roomId), any(ChatMessageInfo.class));
+    }
 }
