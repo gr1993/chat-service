@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
 
 import type { IMessage } from '@stomp/stompjs';
 
 import FlexContainer from '@/components/common/FlexContainer';
+import PrimaryButton from '@/components/common/PrimaryButton';
 import ChatRoom from '@/components/ChatRoom';
 import ChatRoomCreateModal from '@/components/ChatRoomCreateModal';
 
@@ -13,6 +15,19 @@ import { handleApiResponse } from '@/api/apiUtils';
 import type { ChatRoomInfo } from '@/api/types';
 import { getRoomList, createRoom } from '@/api/chatRoom';
 import { useChatSubscribe } from '@/hooks/useChatSubscribe';
+
+const RoomBox = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  width: 100%;
+`;
+
+const ButtonBox = styled.div`
+  width: 100%;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+`;
 
 const ChatRooms: React.FC = () => {
   const [roomList, setRoomList] = useState<ChatRoomInfo[] | null>([]);
@@ -57,11 +72,20 @@ const ChatRooms: React.FC = () => {
     navigate("/chat");
   }
 
+  const handleCreateRoomClick = () => {
+    setIsModalOpen(true);
+  }
+
   return (
     <FlexContainer $flexDirection="column" $justifyContent="flex-start">
-      {roomList?.map((room) => (
-        <ChatRoom key={room.roomId} room={room} onClick={handleRoomClick} />
-      ))}
+      <RoomBox>
+        {roomList?.map((room) => (
+          <ChatRoom key={room.roomId} room={room} onClick={handleRoomClick} />
+        ))}
+      </RoomBox>
+      <ButtonBox>
+        <PrimaryButton type="button" onClick={handleCreateRoomClick} >방 생성</PrimaryButton>
+      </ButtonBox>
       {isModalOpen && (
         <ChatRoomCreateModal
           onClose={() => setIsModalOpen(false)}
