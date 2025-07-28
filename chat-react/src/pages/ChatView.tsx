@@ -14,7 +14,7 @@ import { useChatSubscribe } from '@/hooks/useChatSubscribe';
 import { useStrictEffect } from '@/hooks/useStrictEffect';
 import { handleApiResponse } from '@/api/apiUtils';
 import type { ChatMessageInfo } from '@/api/types';
-import { enterRoom } from '@/api/chatRoom';
+import { enterRoom, exitRoom } from '@/api/chatRoom';
 
 const ChatHistory = styled.div`
   flex: 1;
@@ -38,6 +38,7 @@ const ChatView: React.FC = () => {
   useStrictEffect(() => {
     setHeaderInfo(true, currentRoom?.name ?? '');
 
+    // 새로고침 시 웹소켓 연결 시간을 기다리고 API 호출
     setTimeout(() => {
       // 채팅방 입장 API
       if (currentRoom) {
@@ -47,6 +48,16 @@ const ChatView: React.FC = () => {
         );
       }
     }, 100);
+
+    return () => {
+      // 채팅방 퇴장 API
+      if (currentRoom) {
+        handleApiResponse(
+          exitRoom(currentRoom.id, userId),
+          () => {}
+        );
+      }
+    }
   }, []);
 
   return (
