@@ -13,9 +13,15 @@ import LoginPage from './pages/LoginPage';
 import ChatRooms from './pages/ChatRooms';
 import ChatView from './pages/ChatView';
 
+import { useAppStore } from './store/useAppStore';
+
 function App() {
+  const { setWsSessionId } = useAppStore();
+
   useStrictEffect(() => {
-    connectWebSocket();
+    connectWebSocket((client, sessionId) => {
+      setWsSessionId(sessionId);
+    });
     return () => disconnectWebSocket();
   }, []);
 

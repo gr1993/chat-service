@@ -24,7 +24,7 @@ const ChatHistory = styled.div`
 `;
 
 const ChatView: React.FC = () => {
-  const { setHeaderInfo } = useAppStore();
+  const { wsSessionId, setHeaderInfo } = useAppStore();
   const { currentRoom } = useChatStore();
   const { id: userId } = useUserStore();
   const [messageList, setMessageList] = useState<ChatMessageInfo[] | null>([]);
@@ -43,7 +43,7 @@ const ChatView: React.FC = () => {
       // 채팅방 입장 API
       if (currentRoom) {
         handleApiResponse(
-          enterRoom(currentRoom.id, userId),
+          enterRoom(wsSessionId, currentRoom.id, userId),
           () => {}
         );
       }
