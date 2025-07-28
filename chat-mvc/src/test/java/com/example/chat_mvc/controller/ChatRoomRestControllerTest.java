@@ -1,5 +1,7 @@
 package com.example.chat_mvc.controller;
 
+import com.example.chat_mvc.common.RoomUserSessionManager;
+import com.example.chat_mvc.dto.WebSocketRoomUser;
 import com.example.chat_mvc.service.ChatRoomService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,8 @@ public class ChatRoomRestControllerTest {
     @MockitoBean
     private ChatRoomService chatRoomService;
 
+    @MockitoBean
+    private RoomUserSessionManager roomUserSessionManager;
 
     @Test
     void getRoomList_성공() throws Exception {
@@ -70,10 +74,12 @@ public class ChatRoomRestControllerTest {
         //given
         Long roomId = 1L;
         String userId = "park";
+        String sessionId = "ABCDEFG";
 
         //when
         ResultActions mvcAction = mockMvc.perform(
                 post("/api/room/" + roomId + "/enter")
+                        .header("X-Session-Id", sessionId)
                         .param("userId", userId)
         );
 
@@ -86,6 +92,7 @@ public class ChatRoomRestControllerTest {
                 .andDo(print())
                 .andReturn();
 
+        verify(roomUserSessionManager).addRoomUserSession(sessionId, new WebSocketRoomUser(roomId, userId));
         verify(chatRoomService).enterRoom(roomId, userId);
     }
 
