@@ -26,6 +26,10 @@ public class HttpClientService {
         request(HttpMethod.POST, url, null, requestBody, String.class);
     }
 
+    public void post(String url, HttpHeaders headers, Object requestBody) {
+        request(HttpMethod.POST, url, headers, requestBody, String.class);
+    }
+
     public void put(String url, Object requestBody) {
         request(HttpMethod.PUT, url, null, requestBody, String.class);
     }
