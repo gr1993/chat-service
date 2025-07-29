@@ -13,24 +13,31 @@ import org.springframework.util.MultiValueMap;
 
 import java.util.List;
 
-public class ChatClientService {
+public class ChatHttpClientService {
     private final LoadTestConfig config;
     private final HttpClientService httpClientService = new HttpClientService();
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final HttpHeaders headers;
 
-    public ChatClientService(LoadTestConfig config) {
+    public ChatHttpClientService(LoadTestConfig config) {
         this.config = config;
+
+        headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
     }
 
+    /**
+     * 사용자 로그인(서버에 입장)
+     */
     public void login(String userId) {
         httpClientService.post(config.getRestApiBaseUrl() + "/api/user/entry/" + userId, null);
     }
 
+    /**
+     * 채팅방 생성
+     */
     public Long createRoom(String roomName) {
-        //login("roomCreator");
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        login("roomCreator");
 
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("name", roomName);
@@ -46,9 +53,19 @@ public class ChatClientService {
                 .orElse(null);
     }
 
-    public void enterRoom(String userId) {
+    /**
+     * 채팅방에 입장
+     */
+    public void enterRoom(Long roomId, String userId, String sessionId) {
+        HttpHeaders sessionHeaders = new HttpHeaders();
+        sessionHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        sessionHeaders.add("X-Session-Id", sessionId);
 
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("userId", userId);
+        httpClientService.post(config.getRestApiBaseUrl() + "/api/room/" + roomId + "/enter", sessionHeaders, formData);
     }
+
 
     private <T> T fetchAndParse(String url, HttpHeaders headers, TypeReference<T> typeRef) {
         try {
