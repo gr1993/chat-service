@@ -1,7 +1,6 @@
-package org.example;
+package org.loadtester;
 
-import org.example.dto.ApiResponse;
-import org.example.service.HttpClientService;
+import org.loadtester.service.HttpClientService;
 
 public class Main {
 

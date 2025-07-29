@@ -1,4 +1,4 @@
-package org.example.dto;
+package org.loadtester.dto;
 
 import lombok.Data;
 

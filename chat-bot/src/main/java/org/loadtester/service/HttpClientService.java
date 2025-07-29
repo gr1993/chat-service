@@ -1,4 +1,4 @@
-package org.example.service;
+package org.loadtester.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpEntity;
