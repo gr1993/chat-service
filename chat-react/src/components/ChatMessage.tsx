@@ -60,7 +60,7 @@ type ChatMessageProps = {
 const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   if (message.type === 'system') {
     return (
-      <SystemMessageWrapper key={message.id}>
+      <SystemMessageWrapper key={message.messageId}>
         <SystemMessage>{message.message}</SystemMessage>
       </SystemMessageWrapper>
     );
@@ -68,14 +68,14 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
 
   if (message.position === 'left') {
     return (
-      <Left key={message.id}>
+      <Left key={message.messageId}>
         <NameTag>{message.senderId}</NameTag>
         <Bubble>{message.message}</Bubble>
       </Left>
     );
   } else {
     return (
-      <Right key={message.id}>
+      <Right key={message.messageId}>
         <NameTag>{message.senderId}</NameTag>
         <Bubble>{message.message}</Bubble>
       </Right>

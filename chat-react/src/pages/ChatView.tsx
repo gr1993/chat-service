@@ -19,6 +19,7 @@ import { enterRoom, exitRoom } from '@/api/chatRoom';
 
 const ChatHistory = styled.div`
   flex: 1;
+  width: 100%;
   overflow-y: auto;
   padding: 15px;
   background-color: #f9f9f9;
@@ -33,6 +34,7 @@ const ChatView: React.FC = () => {
   // 채팅방 메세지, 입장, 퇴장 정보 구독
   useChatSubscribe(`/topic/message/${currentRoom?.id}`, (message: IMessage) => {
     const payload: ChatMessageInfo = JSON.parse(message.body);
+    payload.position = payload.senderId === userId ? 'right' : 'left';
     setMessageList((prev) => [...(prev ?? []), payload]);
   });
 
