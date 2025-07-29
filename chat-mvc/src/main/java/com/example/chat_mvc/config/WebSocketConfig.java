@@ -18,9 +18,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
+        // 브라우저용 웹소켓 설정
         registry
                 .addEndpoint("/ws")
                 .setAllowedOriginPatterns("http://localhost:5173")
                 .withSockJS();
+
+        // 부하테스트용 웹소켓 설정
+        registry
+                .addEndpoint("/ws")
+                .setAllowedOriginPatterns("*");
     }
 }
