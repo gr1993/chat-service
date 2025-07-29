@@ -1,0 +1,10 @@
+{
+  "userCount": 100,
+  "rampUpTimeSeconds": 10,
+  "chatDurationSeconds": 60,
+  "messageRatePerUser": 1,
+  "messageLength": 50,
+  "restApiBaseUrl": "http://localhost:8080",
+  "webSocketEndpoint": "ws://localhost:8080/ws/chat",
+  "loginType": "dynamic"
+}
