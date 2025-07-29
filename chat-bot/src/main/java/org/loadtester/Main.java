@@ -7,13 +7,15 @@ import org.loadtester.service.ChatClientService;
 
 public class Main {
 
-    private final static String ROOM_NAME = "부하테스트방";
     private final static LoadTestConfig config = ConfigLoader.load("config.json");
     private final static ChatClientService chatClient = new ChatClientService(config);
 
+    private final static String ROOM_NAME = "부하테스트방";
+    private static Long roomId = 0L;
+
     public static void main(String[] args) {
         try {
-            chatClient.createRoom(ROOM_NAME);
+            roomId = chatClient.createRoom(ROOM_NAME);
 
             int userCount = config.getUserCount();
 
@@ -32,6 +34,4 @@ public class Main {
     public static void simulateUser(String userId) {
         chatClient.login(userId);
     }
-
-
 }

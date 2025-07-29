@@ -11,8 +11,8 @@ import java.net.URI;
 
 public class HttpClientService {
 
-    private RestTemplate restTemplate = new RestTemplate();
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final RestTemplate restTemplate = new RestTemplate();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public <T> T get(String url, Class<T> responseType) {
         return request(HttpMethod.GET, url, null,null, responseType);
