@@ -19,3 +19,9 @@
 | `messageLength` | int | 생성할 메시지 문자열 길이 | `30` |
 | `restApiBaseUrl` | string | 로그인/채팅 등 REST API의 Base URL | `http://localhost:8080` |
 | `webSocketEndpoint` | string | WebSocket 접속 URL | `ws://localhost:8080/ws/chat` |
+
+### 부하테스트 리포팅
+아래는 부하테스트가 끝나고 출력되는 결과 예시이다.
+
+모든 사용자 시뮬레이션이 완료되어 메인 함수를 종료합니다.
+총 메세지 전송 갯수 : 600개

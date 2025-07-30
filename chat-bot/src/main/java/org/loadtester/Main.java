@@ -10,6 +10,7 @@ import org.loadtester.service.ChatWebSocketClientService;
 import org.loadtester.util.MessageUtil;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 public class Main {
@@ -21,6 +22,8 @@ public class Main {
     private static Long roomId = 0L;
     private final static String SEND_MESSAGE = MessageUtil.generateRandomMessage(config.getMessageLength());
     private static CountDownLatch userCompletionLatch;
+
+    private final static AtomicLong totalMessageCount = new AtomicLong();
 
     public static void main(String[] args) {
         try {
@@ -44,6 +47,7 @@ public class Main {
 
             userCompletionLatch.await();
             System.out.println("모든 사용자 시뮬레이션이 완료되어 메인 함수를 종료합니다.");
+            System.out.println("총 메세지 전송 갯수 : " + totalMessageCount.get() + "개");
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -78,7 +82,10 @@ public class Main {
                                     userId,
                                     SEND_MESSAGE
                             );
+
                             stompSession.send("/api/messages", messageInfo);
+                            totalMessageCount.incrementAndGet();
+
                             Thread.sleep(messageSendInterval);
                         }
                     } catch (InterruptedException e) {
