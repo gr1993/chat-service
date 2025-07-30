@@ -9,7 +9,6 @@ public class LoadTestConfig {
     private int userCount;
     private int rampUpTimeSeconds;
     private int chatDurationSeconds;
-    private double messageRatePerUser;
     private int messageLength;
     private String restApiBaseUrl;
     private String webSocketEndpoint;

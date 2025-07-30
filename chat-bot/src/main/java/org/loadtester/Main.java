@@ -4,9 +4,12 @@ import org.loadtester.config.ConfigLoader;
 import org.loadtester.dto.ChatMessageInfo;
 import org.loadtester.dto.ChatRoomInfo;
 import org.loadtester.dto.LoadTestConfig;
+import org.loadtester.dto.SendMessageInfo;
 import org.loadtester.service.ChatHttpClientService;
 import org.loadtester.service.ChatWebSocketClientService;
-import org.springframework.messaging.simp.stomp.StompSession;
+import org.loadtester.util.MessageUtil;
+
+import java.util.concurrent.CountDownLatch;
 
 
 public class Main {
@@ -16,25 +19,32 @@ public class Main {
 
     private final static String ROOM_NAME = "부하테스트방";
     private static Long roomId = 0L;
+    private final static String SEND_MESSAGE = MessageUtil.generateRandomMessage(config.getMessageLength());
+    private static CountDownLatch userCompletionLatch;
 
     public static void main(String[] args) {
         try {
             roomId = chatClient.createRoom(ROOM_NAME);
 
             int userCount = config.getUserCount();
+            userCompletionLatch = new CountDownLatch(userCount);
             int rampUpTimeSeconds = config.getRampUpTimeSeconds();
             long delayMillis = (rampUpTimeSeconds * 1000L) / userCount;
 
             for (int i = 1; i < userCount + 1; i++) {
                 int userId = i;
                 Thread userThread = new Thread(() -> {
-                    simulateUser("User" + userId);
+                    simulateUser("Userer" + userId);
                 });
                 userThread.start();
 
                 // 각 사용자 생성 사이에 delay 추가
                 Thread.sleep(delayMillis);
             }
+
+            userCompletionLatch.await();
+            System.out.println("모든 사용자 시뮬레이션이 완료되어 메인 함수를 종료합니다.");
+
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -45,7 +55,7 @@ public class Main {
             chatClient.login(userId);
 
             ChatWebSocketClientService chatWebSocketClient = new ChatWebSocketClientService(config.getWebSocketEndpoint());
-            StompSession session = chatWebSocketClient.connectWebSocket((stompSession -> {
+            chatWebSocketClient.connectWebSocket((stompSession -> {
                 // 채팅방 생성 구독
                 ChatWebSocketClientService.subscribeStomp(stompSession, "/topic/rooms", ChatRoomInfo.class);
 
@@ -54,19 +64,41 @@ public class Main {
                 
                 // 채팅방 입장 API 요청
                 chatClient.enterRoom(roomId, userId, stompSession.getSessionId());
+
+                new Thread(() -> {
+                    try {
+                        long messageSendInterval = 1000L; // 1초마다 메시지 전송
+                        long chatDurationMillis = config.getChatDurationSeconds() * 1000L;
+                        long startTime = System.currentTimeMillis();
+
+                        while (System.currentTimeMillis() - startTime < chatDurationMillis && stompSession.isConnected()) {
+                            // 메시지 전송
+                            SendMessageInfo messageInfo = new SendMessageInfo(
+                                    roomId,
+                                    userId,
+                                    SEND_MESSAGE
+                            );
+                            stompSession.send("/api/messages", messageInfo);
+                            Thread.sleep(messageSendInterval);
+                        }
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt(); // 인터럽트 상태 복원
+                        System.out.println("메시지 전송 스레드 인터럽트됨. 사용자: " + userId);
+                    } catch (Exception e) {
+                        System.err.println("메시지 전송 중 오류 발생. 사용자 " + userId + ": " + e.getMessage());
+                    } finally {
+                        // 채팅방 퇴장 API 호출
+                        chatClient.exitRoom(roomId, userId);
+
+                        if (stompSession.isConnected()) {
+                            stompSession.disconnect();
+                            System.out.println("웹소켓 세션이 종료되었습니다.");
+
+                            userCompletionLatch.countDown();
+                        }
+                    }
+                }).start();
             }));
-
-            // 사용자가 채팅방에 머무는 시간 (초 → 밀리초)
-            long durationMillis = config.getChatDurationSeconds() * 1000L;
-            Thread.sleep(durationMillis);
-
-            // 채팅방 퇴장 API 호출
-            chatClient.exitRoom(roomId, userId);
-
-            if (session.isConnected()) {
-                session.disconnect();
-                System.out.println("웹소켓 세션이 종료되었습니다.");
-            }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
