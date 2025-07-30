@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class LoadTestConfig {
+    private String userIdPrefix;
     private int userCount;
     private int rampUpTimeSeconds;
     private int chatDurationSeconds;

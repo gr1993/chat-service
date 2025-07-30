@@ -34,7 +34,7 @@ public class Main {
             for (int i = 1; i < userCount + 1; i++) {
                 int userId = i;
                 Thread userThread = new Thread(() -> {
-                    simulateUser("Userer" + userId);
+                    simulateUser(config.getUserIdPrefix() + userId);
                 });
                 userThread.start();
 

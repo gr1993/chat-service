@@ -12,6 +12,7 @@
 
 | Key | Type | Description | Example |
 |-----|------|-------------|---------|
+| `userIdPrefix` | string | 시뮬레이션할 사용자명 prefix   | `userIdPrefix` |
 | `userCount` | int | 총 시뮬레이션할 사용자 수 | `100` |
 | `rampUpTimeSeconds` | int | 모든 사용자가 입장 완료되기까지 걸리는 시간(초) | `10` |
 | `chatDurationSeconds` | int | 사용자가 채팅방에 머무는 시간(초) | `60` |

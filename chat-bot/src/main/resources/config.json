@@ -1,4 +1,5 @@
 {
+  "userIdPrefix": "UserBot",
   "userCount": 20,
   "rampUpTimeSeconds": 5,
   "chatDurationSeconds": 20,
