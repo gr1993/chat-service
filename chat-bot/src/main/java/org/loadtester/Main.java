@@ -22,6 +22,8 @@ public class Main {
             roomId = chatClient.createRoom(ROOM_NAME);
 
             int userCount = config.getUserCount();
+            int rampUpTimeSeconds = config.getRampUpTimeSeconds();
+            long delayMillis = (rampUpTimeSeconds * 1000L) / userCount;
 
             for (int i = 1; i < userCount + 1; i++) {
                 int userId = i;
@@ -29,6 +31,9 @@ public class Main {
                     simulateUser("User" + userId);
                 });
                 userThread.start();
+
+                // 각 사용자 생성 사이에 delay 추가
+                Thread.sleep(delayMillis);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -51,7 +56,12 @@ public class Main {
                 chatClient.enterRoom(roomId, userId, stompSession.getSessionId());
             }));
 
-            Thread.sleep(1000000);
+            // 사용자가 채팅방에 머무는 시간 (초 → 밀리초)
+            long durationMillis = config.getChatDurationSeconds() * 1000L;
+            Thread.sleep(durationMillis);
+
+            // 채팅방 퇴장 API 호출
+            chatClient.exitRoom(roomId, userId);
 
             if (session.isConnected()) {
                 session.disconnect();

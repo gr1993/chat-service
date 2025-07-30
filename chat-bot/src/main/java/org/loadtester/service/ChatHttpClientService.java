@@ -66,6 +66,18 @@ public class ChatHttpClientService {
         httpClientService.post(config.getRestApiBaseUrl() + "/api/room/" + roomId + "/enter", sessionHeaders, formData);
     }
 
+    /**
+     * 채팅방에서 퇴장
+     */
+    public void exitRoom(Long roomId, String userId) {
+        HttpHeaders sessionHeaders = new HttpHeaders();
+        sessionHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("userId", userId);
+        httpClientService.post(config.getRestApiBaseUrl() + "/api/room/" + roomId + "/exit", sessionHeaders, formData);
+    }
+
 
     private <T> T fetchAndParse(String url, HttpHeaders headers, TypeReference<T> typeRef) {
         try {
