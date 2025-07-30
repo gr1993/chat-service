@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 
 import type { CompatClient, IMessage } from '@stomp/stompjs';
@@ -30,6 +30,7 @@ const ChatView: React.FC = () => {
   const { currentRoom } = useChatStore();
   const { id: userId } = useUserStore();
   const [messageList, setMessageList] = useState<ChatMessageInfo[] | null>([]);
+  const chatBoxRef = useRef<HTMLDivElement>(null);
 
   // 채팅방 메세지, 입장, 퇴장 정보 구독
   useChatSubscribe(`/topic/message/${currentRoom?.id}`, (message: IMessage) => {
@@ -63,6 +64,13 @@ const ChatView: React.FC = () => {
     }
   }, []);
 
+  // 새 메시지가 올 때마다 자동 스크롤
+  useEffect(() => {
+    if (chatBoxRef.current) {
+      chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
+    }
+  }, [messageList]);
+
   const sendMessageBtnClick = (message: string) => {
     // 메세지 전송 웹소켓 API
     const client: CompatClient | null = getWebSocketClient();
@@ -81,7 +89,7 @@ const ChatView: React.FC = () => {
 
   return (
     <FlexContainer $flexDirection="column">
-      <ChatHistory>
+      <ChatHistory ref={chatBoxRef}>
         {messageList?.map((message) => (
           <ChatMessage key={message.messageId} message={message} />
         ))}
