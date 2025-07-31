@@ -38,7 +38,6 @@ import static org.mockito.Mockito.when;
 
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ChatRoomWebSocketTest {
 
     @Autowired
@@ -113,7 +112,7 @@ public class ChatRoomWebSocketTest {
         }
     }
 
-    private <T> BlockingQueue<T> getWebSocketQueue(String destination, Class<T> clazz) {
+    private <T> BlockingQueue<T> getWebSocketQueue(String destination, Class<T> clazz) throws Exception {
         BlockingQueue<T> blockingQueue = new LinkedBlockingQueue<>();
 
         StompSession session = connectWebSocket();
@@ -128,6 +127,9 @@ public class ChatRoomWebSocketTest {
                 blockingQueue.add(clazz.cast(payload));
             }
         });
+
+        // 구독될 시간을 충분히 확보(나중에 웹소켓 연결 후 구독하는 식으로 변경 필요)
+        Thread.sleep(300);
 
         return blockingQueue;
     }
