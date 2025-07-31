@@ -3,5 +3,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: chat-mvc
+    privileged: true
     ports:
       - "8080:8080"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.5"
+          memory: 512M
