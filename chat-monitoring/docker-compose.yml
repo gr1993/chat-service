@@ -1,0 +1,14 @@
+services:
+  chat-prometheus:
+    image: prom/prometheus
+    container_name: chat-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - chat-net
+
+networks:
+  chat-net:
+    external: true
