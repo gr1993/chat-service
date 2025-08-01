@@ -1,6 +1,6 @@
 # chat-service
-동일한 채팅 서비스를 Spring MVC와 WebFlux 각각의 방식으로 구현하여 성능과 처리 방식 차이를 비교하기  
-
+동일한 채팅 서비스를 Spring MVC와 WebFlux 방식으로 각각 구현하여, 성능 및 처리 방식의 차이를 비교한다.
+또한, 성능 테스트를 통해 JVM의 주요 리소스 사용 현황을 자세히 파악하고, 중요한 지표들을 분석한다.
 
 <pre><code>```
 [chat-react]
@@ -15,7 +15,7 @@
 [chat-webflux]
     └── Spring Boot WebFlux + Netty 기반 채팅 서버
 
-[monitoring]
+[chat-monitoring]
     └── Prometheus, Grafana 등 모니터링 설정
 ``` </code></pre>
 
