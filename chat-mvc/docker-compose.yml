@@ -7,6 +7,8 @@ services:
     privileged: true
     ports:
       - "8080:8080"
+    networks:
+      - chat-net
     deploy:
       resources:
         limits:
@@ -15,3 +17,8 @@ services:
         reservations:
           cpus: "0.5"
           memory: 512M
+
+networks:
+  chat-net:
+    name: chat-net
+    driver: bridge
