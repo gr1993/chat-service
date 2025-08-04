@@ -8,14 +8,48 @@ Prometheus는 일정 간격으로 이 메트릭을 수집(pull)하고, Grafana�
 * Grafana
 
 
-### Grafana 시각화
-그라파나를 시각화하는 방법은 크게 두 가지가 있다. 그라파나 웹 UI에 접속하여 데이터 소스 설정으로 프로메테우스 서버  
-접속 정보를 등록하는 수동 방법이 있고, docker-compose.xml 파일이 있는 하위 경로에 프로비저닝 파일을 추가하여  
-컨테이너 시작 시 자동으로 프로메테우스 데이터 소스 설정을 추가하는 방법이 있다. 이번에는 자동 설정 방식을 사용했다.
+### Prometheus의 지표명 확인 방법
+Spring Boot에서는 /actuator/metrics 엔드포인트를 통해 JVM을 포함한 다양한 지표명을 쉽게 확인할 수 있다. 하지만  
+Prometheus에서는 지표명만을 나열해주는 전용 엔드포인트가 제공되지 않기 때문에, 다음과 같은 방법을 통해 지표명을 확인할 수 있다  
 
+```shell
+# 프로메테우스 지표명 목록 출력 url
+curl http://<prometheus-host>:9090/api/v1/label/__name__/values
+```
+
+#### 이번 프로메테우스에 사용된 지표명
+```
+# 메시지 처리량(TPS : 커스텀 지표)
+chat_app_messages_processed_total
+rate(chat_app_messages_processed_total[1m])
+
+# 응답 속도 관련 지표
+http_server_requests_seconds_count
+http_server_requests_seconds_sum
+http_server_requests_seconds_max
+http_server_requests_seconds_max{uri="/api/v1/send",method="POST"}
+
+# CPU 사용률
+process_cpu_usage
+system_cpu_usage
+
+# 메모리 사용량
+jvm_memory_used_bytes{area="heap"}
+
+# GC 시간 / 횟수
+jvm_gc_pause_seconds_sum
+jvm_gc_pause_seconds_count
+
+# 동시 접속자 수(커스텀 지표)
+chat_app_active_connections
+chat_app_active_http_requests
+```
+
+
+### Grafana 시각화
 Grafana에서 시각화를 설정하는 방법은 크게 두 가지가 있다.
 1. Grafana 웹 UI에 접속해 데이터 소스 설정에서 Prometheus 서버의 접속 정보를 직접 등록하는 수동 방식
-2. docker-compose.yml이 위치한 하위 경로에 프로비저닝(provisioning) 파일을 추가하여, 컨테이너가 시작될 때 자동으로 Prometheus를 데이터 소스로 등록하는 방식
+2. docker-compose.yml이 위치한 하위 경로에 프로비저닝(provisioning) 파일을 추가하여, 컨테이너가 시작될 때 자동으로 Prometheus를 데이터 소스로 등록하거나 대시보드를 불러오는 방식
 
 이번에는 후자인 자동 설정 방식을 사용하였다.  
 대시보드 또한 프로비저닝 방식을 사용했으며, 사전에 대시보드를 구성하는 것은 웹 UI로 진행한 후 Export 기능을 이용해  
