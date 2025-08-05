@@ -30,8 +30,8 @@ http_server_requests_seconds_max
 http_server_requests_seconds_max{uri="/api/v1/send",method="POST"}
 
 # CPU 사용률
-process_cpu_usage
 system_cpu_usage
+process_cpu_usage
 
 # 메모리 사용량
 jvm_memory_used_bytes{area="heap"}
