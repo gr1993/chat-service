@@ -37,9 +37,14 @@ rate(http_server_requests_seconds_sum{uri="/api/room/{roomId}/enter"}[1m]) / rat
 # 최근 1분 동안 가장 오래걸린 응답시간
 max_over_time(http_server_requests_seconds_max{uri="/api/room/{roomId}/enter"}[1m])
 
-# 메시지 처리량(TPS : 커스텀 지표)
-chat_app_messages_processed_total
-rate(chat_app_messages_processed_total[1m])
+# 웹소켓 메시지 전송 지표(커스텀 지표)
+# 어플리케이션에서 websocket_message_seconds 커스텀 지표 추가
+# 누적 호출수
+websocket_message_seconds_count
+# TPS
+rate(websocket_message_seconds_count[1m])
+# 최근 1분 동안 가장 오래걸린 처리시간
+max_over_time(websocket_message_seconds_max[1m])
 
 # 동시 접속자 수(커스텀 지표)
 chat_app_active_connections
@@ -55,6 +60,8 @@ Grafana에서 시각화를 설정하는 방법은 크게 두 가지가 있다.
 이번에는 후자인 자동 설정 방식을 사용하였다.  
 대시보드 또한 프로비저닝 방식을 사용했으며, 사전에 대시보드를 구성하는 것은 웹 UI로 진행한 후 Export 기능을 이용해  
 JSON 파일로 저장하여 다음 컨테이너 구동부터 자동 설정되도록 구성하였다.
+
+#### 대시보드 캡쳐 이미지
 
 
 ### 도커 환경 구성
