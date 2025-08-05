@@ -30,11 +30,12 @@ jvm_memory_used_bytes{area="heap"}
 jvm_gc_pause_seconds_count
 jvm_gc_pause_seconds_max
 
-# 응답 속도 관련 지표
-http_server_requests_seconds_count
-http_server_requests_seconds_sum
-http_server_requests_seconds_max
-http_server_requests_seconds_max{uri="/api/v1/send",method="POST"}
+# REST API 관련 지표(방 입장 API)
+http_server_requests_seconds_count{uri="/api/room/{roomId}/enter"}
+# 방 입장 API 평균 응답시간이며 급격한 변화율을 감지하고 싶어서 1분 이내로 설정
+rate(http_server_requests_seconds_sum{uri="/api/room/{roomId}/enter"}[1m]) / rate(http_server_requests_seconds_count{uri="/api/room/{roomId}/enter"}[1m])
+# 최근 1분 동안 가장 오래걸린 응답시간
+max_over_time(http_server_requests_seconds_max{uri="/api/room/{roomId}/enter"}[1m])
 
 # 메시지 처리량(TPS : 커스텀 지표)
 chat_app_messages_processed_total
