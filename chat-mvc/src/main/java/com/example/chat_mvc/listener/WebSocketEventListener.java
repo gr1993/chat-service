@@ -41,8 +41,8 @@ public class WebSocketEventListener {
         if (roomUser != null) {
             // 해당 사용자 퇴장 처리
             chatRoomService.exitRoom(roomUser.getRoomId(), roomUser.getUserId());
-            activeConnections.decrementAndGet();
         }
+        activeConnections.decrementAndGet();
     }
 
     @Bean
