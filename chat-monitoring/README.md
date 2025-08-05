@@ -19,16 +19,6 @@ curl http://<prometheus-host>:9090/api/v1/label/__name__/values
 
 #### 이번 프로메테우스에 사용된 지표명
 ```
-# 메시지 처리량(TPS : 커스텀 지표)
-chat_app_messages_processed_total
-rate(chat_app_messages_processed_total[1m])
-
-# 응답 속도 관련 지표
-http_server_requests_seconds_count
-http_server_requests_seconds_sum
-http_server_requests_seconds_max
-http_server_requests_seconds_max{uri="/api/v1/send",method="POST"}
-
 # CPU 사용률
 system_cpu_usage
 process_cpu_usage
@@ -36,9 +26,19 @@ process_cpu_usage
 # 메모리 사용량
 jvm_memory_used_bytes{area="heap"}
 
-# GC 시간 / 횟수
-jvm_gc_pause_seconds_sum
+# GC 횟수 / 최대 지연 시간
 jvm_gc_pause_seconds_count
+jvm_gc_pause_seconds_max
+
+# 응답 속도 관련 지표
+http_server_requests_seconds_count
+http_server_requests_seconds_sum
+http_server_requests_seconds_max
+http_server_requests_seconds_max{uri="/api/v1/send",method="POST"}
+
+# 메시지 처리량(TPS : 커스텀 지표)
+chat_app_messages_processed_total
+rate(chat_app_messages_processed_total[1m])
 
 # 동시 접속자 수(커스텀 지표)
 chat_app_active_connections
