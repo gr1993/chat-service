@@ -50,7 +50,8 @@ chat-bot를 통해 시뮬레이션 부하를 발생시키고 Prometheus, Grafana
 
 
 ### 채팅 웹 클라이언트 화면 시연
-
+![chat-app1](./docs/chat-app1.gif)
+![chat-app2](./docs/chat-app2.gif)
 
 
 ### 성능테스트 결과
