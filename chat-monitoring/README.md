@@ -62,6 +62,8 @@ Grafana에서 시각화를 설정하는 방법은 크게 두 가지가 있다.
 JSON 파일로 저장하여 다음 컨테이너 구동부터 자동 설정되도록 구성하였다.
 
 #### 대시보드 캡쳐 이미지
+![panel1](../docs/grafana-panel1.png)
+![panel2](../docs/grafana-panel2.png)
 
 
 ### 도커 환경 구성
