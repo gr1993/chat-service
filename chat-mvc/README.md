@@ -21,8 +21,14 @@ docker-compose.yml : CPU, Memory 제한 설정
 Dockerfile : tc를 사용하여 네트워크 속도를 제한하려 했으나 호스트 OS가 Window11이라 불가하였다.
 
 #### 컨테이너 실행 명령어
-재빌드 후 실행 명령어 : docker-compose up --build -d
-재실행 명령어 : docker-compose down && docker-compose up -d
+```shell
+# 재빌드 후 실행 명령어
+docker-compose up --build -d
+
+# 재실행 명령어
+# 명령어 파이프 (linux=&&, Window cmd=&, Window PowerShell=;)
+docker-compose down && docker-compose up -d
+```
 
 
 ### 리소스 제한 확인
