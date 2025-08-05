@@ -47,8 +47,8 @@ rate(websocket_message_seconds_count[1m])
 max_over_time(websocket_message_seconds_max[1m])
 
 # 동시 접속자 수(커스텀 지표)
+# 웹소켓 연결 수
 chat_app_active_connections
-chat_app_active_http_requests
 ```
 
 
