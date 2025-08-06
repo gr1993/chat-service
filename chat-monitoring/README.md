@@ -50,6 +50,9 @@ max_over_time(websocket_message_seconds_max[1m])
 # 동시 접속자 수(커스텀 지표)
 # 웹소켓 연결 수
 chat_app_active_connections
+
+# 현재 쓰레드수(mvc와 webflux가 사용하는 쓰레드수 차이를 비교하기 위해 추가)
+jvm_threads_live_threads
 ```
 
 
