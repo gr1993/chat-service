@@ -1,0 +1,11 @@
+groups:
+  - name: example-alerts
+    rules:
+      - alert: 메모리_과다_사용
+        expr: jvm_memory_used_bytes{area="heap"} > 52428800
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "메모리 사용량이 높습니다"
+          description: "현재 프로세스의 메모리 사용량이 1분 이상 50MB를 초과하고 있습니다."

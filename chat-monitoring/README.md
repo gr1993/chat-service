@@ -6,6 +6,7 @@ Prometheus는 일정 간격으로 이 메트릭을 수집(pull)하고, Grafana�
 ### 모니터링 시스템
 * Prometheus
 * Grafana
+* Alertmanger : 특별한 용도는 없고 간단한 이메일 알림 실습을 위해 추가함
 
 
 ### Prometheus의 지표명 확인 방법
