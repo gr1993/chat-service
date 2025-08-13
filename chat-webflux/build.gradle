@@ -21,8 +21,21 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+	// 웹소켓 테스트를 위해 아래 의존성이 필요
+	testImplementation 'org.springframework:spring-messaging'
+	testImplementation 'org.springframework:spring-websocket'
+	testImplementation 'jakarta.websocket:jakarta.websocket-client-api'
+	testImplementation 'org.glassfish.tyrus:tyrus-container-grizzly-client:2.1.2'
+	testImplementation 'org.glassfish.tyrus:tyrus-client:2.1.2'
+
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
 }
 
 tasks.named('test') {
