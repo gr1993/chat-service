@@ -3,6 +3,7 @@ package com.example.chat_webflux.websocket;
 
 import com.example.chat_webflux.dto.ChatMessageInfo;
 import com.example.chat_webflux.dto.SendMessageInfo;
+import com.example.chat_webflux.entity.MessageType;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -82,7 +83,7 @@ public class ChatWebSocketHandlerTest {
         assertTrue(StringUtils.hasText(chatMessageInfo.getMessage()));
         assertEquals(message, chatMessageInfo.getMessage());
         assertTrue(StringUtils.hasText(chatMessageInfo.getSendDt()));
-        //assertEquals(MessageType.user.name(), chatMessageInfo.getType());
+        assertEquals(MessageType.user.name(), chatMessageInfo.getType());
     }
 
     private StompSession connectWebSocket() {

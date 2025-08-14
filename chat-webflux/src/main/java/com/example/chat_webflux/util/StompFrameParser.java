@@ -54,9 +54,10 @@ public class StompFrameParser {
     /**
      * 메시지 전송용 STOMP 프레임 생성
      */
-    public static String createStompMessageFrame(String destination, String jsonBody) {
+    public static String createStompMessageFrame(String destination, String subscriptionId, String jsonBody) {
         return "MESSAGE\n" +
                 "destination:" + destination + "\n" +
+                "subscription:" + subscriptionId + "\n" +
                 "content-type:application/json;charset=UTF-8\n" +
                 "\n" +
                 jsonBody + "\n\0";

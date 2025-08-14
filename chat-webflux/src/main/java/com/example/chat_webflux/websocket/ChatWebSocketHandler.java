@@ -1,53 +1,72 @@
 package com.example.chat_webflux.websocket;
 
+import com.example.chat_webflux.dto.ChatMessageInfo;
+import com.example.chat_webflux.dto.SendMessageInfo;
+import com.example.chat_webflux.entity.MessageType;
 import com.example.chat_webflux.util.StompFrameParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.socket.WebSocketHandler;
+import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 @Component
 public class ChatWebSocketHandler implements WebSocketHandler {
 
-    private final Sinks.Many<String> chatMessageSink = Sinks.many().multicast().onBackpressureBuffer();
-    private final Flux<String> chatMessages = chatMessageSink.asFlux();
+    // 채팅방 ID -> 해당 채팅방의 메시지 스트림을 관리하는 맵
+    private final ConcurrentHashMap<String, Sinks.Many<String>> roomSinks = new ConcurrentHashMap<>();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * 웹소켓 연결 이벤트 처리
+     * 해당 연결의 수명 주기 전체를 책임지는 하나의 리액티브 스트림을 정의하고 반환
+     * 클라이언트로부터 들어오는 메시지(input)와 서버에서 클라이언트로 나가는 메시지(output)를 모두 하나의 파이프라인에서 처리하도록 설계
      */
     @Override
     public Mono<Void> handle(WebSocketSession session) {
-        // 클라이언트로부터 들어오는 메시지 스트림
+        // 각 세션마다 메시지를 받아 발행할 Sinks를 생성
+        // 이 Sinks는 오직 현재 연결된 클라이언트(세션)에게만 메시지를 보낸다.
+        Sinks.Many<String> sessionSink = Sinks.many().unicast().onBackpressureBuffer();
+
+        // 1. 메시지 수신 스트림 (클라이언트 -> 서버)
         Mono<Void> input = session.receive()
-                .map(webSocketMessage -> webSocketMessage.getPayloadAsText())
-                .doOnNext(message -> handleStompMessage(session, message))
+                .map(WebSocketMessage::getPayloadAsText)
+                .doOnNext(message -> handleStompMessage(sessionSink, session, message))
+                .doFinally(signal -> {
+                    // 세션이 종료되면 해당 세션의 구독을 해지
+                    sessionSink.tryEmitComplete();
+                })
                 .then();
 
-        // 클라이언트에게 보내는 메시지 스트림
-        Mono<Void> output = session.send(chatMessages
-                .map(json -> {
-                    String stompFrame = StompFrameParser.createStompMessageFrame("/topic/chat", json);
-                    return session.textMessage(stompFrame);
-                })
-        );
+        // 2. 메시지 송신 스트림 (서버 -> 클라이언트)
+        Flux<WebSocketMessage> output = sessionSink.asFlux()
+                .map(session::textMessage);
 
-        return Mono.zip(input, output).then();
+        // input과 output을 합쳐 하나의 리액티브 체인으로 생성
+        return session.send(output).and(input);
     }
 
-    private void handleStompMessage(WebSocketSession session, String stompMessage) {
+    private void handleStompMessage(Sinks.Many<String> sessionSink, WebSocketSession session, String stompMessage) {
         String command = StompFrameParser.getCommand(stompMessage);
 
         switch (command) {
             case "CONNECT":
-                handleConnect(session);
+                handleConnect(sessionSink);
                 break;
             case "SEND":
-                handleSend(stompMessage);
+                try {
+                    handleSend(stompMessage);
+                } catch (Exception ex) {
+                    return;
+                }
                 break;
             case "SUBSCRIBE":
-                // 구독 처리 로직
+                handleSubscribe(sessionSink, stompMessage);
                 break;
             case "DISCONNECT":
                 // 연결 해제 처리 로직
@@ -61,18 +80,64 @@ public class ChatWebSocketHandler implements WebSocketHandler {
         }
     }
 
-    private void handleConnect(WebSocketSession session) {
+    private void handleConnect(Sinks.Many<String> sessionSink) {
         String connectedFrame = "CONNECTED\n" +
                 "version:1.2\n" +
                 "heart-beat:0,0\n" +
                 "\n\0";
-        session.send(Mono.just(session.textMessage(connectedFrame))).subscribe();
+
+        sessionSink.tryEmitNext(connectedFrame);
     }
 
-    private void handleSend(String stompMessage) {
+    private void handleSend(String stompMessage) throws Exception {
+        String destination = StompFrameParser.getHeader(stompMessage, "destination");
         String jsonBody = StompFrameParser.getBody(stompMessage);
-        if (jsonBody != null) {
-            chatMessageSink.tryEmitNext(jsonBody);
+
+        // 메세지 전송
+        if (destination != null && destination.startsWith("/api/messages") && jsonBody != null) {
+            SendMessageInfo sendMessageInfo = objectMapper.readValue(jsonBody, SendMessageInfo.class);
+            Long roomId = sendMessageInfo.getRoomId();
+
+            // 해당 채팅방의 Sinks.Many를 가져오거나 없으면 새로 생성
+            Sinks.Many<String> roomSink = roomSinks.computeIfAbsent(roomId.toString(), k ->
+                    Sinks.many().multicast().onBackpressureBuffer()
+            );
+
+            // 메시지 발행 (해당 방의 구독자들에게만 전달)
+            ChatMessageInfo chatMessageInfo = new ChatMessageInfo();
+            chatMessageInfo.setMessageId(1L);
+            chatMessageInfo.setType(MessageType.user.name());
+            chatMessageInfo.setSenderId("lim");
+            chatMessageInfo.setSendDt("2025-08-13T15:37:40");
+            chatMessageInfo.setMessage(sendMessageInfo.getMessage());
+            roomSink.tryEmitNext(objectMapper.writeValueAsString(chatMessageInfo));
+        }
+    }
+
+    private void handleSubscribe(Sinks.Many<String> sessionSink, String stompMessage) {
+        String destination = StompFrameParser.getHeader(stompMessage, "destination");
+        String subscriptionId = StompFrameParser.getHeader(stompMessage, "id"); // 구독 ID 추출
+
+        if (destination != null && destination.startsWith("/topic/message/") && subscriptionId != null) {
+            String roomId = destination.substring("/topic/message/".length());
+
+            // 해당 채팅방의 Sinks.Many를 가져오거나 없으면 새로 생성
+            Sinks.Many<String> roomSink = roomSinks.computeIfAbsent(roomId, k ->
+                    Sinks.many().multicast().onBackpressureBuffer()
+            );
+
+            // 이 Flux를 현재 세션의 sessionSink에 구독
+            roomSink.asFlux()
+                    .map(json -> {
+                        String stompFrame = StompFrameParser.createStompMessageFrame(destination, subscriptionId, json);
+                        return stompFrame; // 이제 STOMP 프레임이 된 문자열을 sessionSink에 발행
+                    })
+                    .subscribe(
+                            // 이 메시지는 handle()의 output 스트림을 타고 클라이언트에게 전달
+                            message -> sessionSink.tryEmitNext(message),
+                            error -> {},
+                            () -> {}
+                    );
         }
     }
 }
