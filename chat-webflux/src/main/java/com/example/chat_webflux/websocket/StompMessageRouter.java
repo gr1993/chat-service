@@ -9,7 +9,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.socket.WebSocketSession;
+import reactor.core.Disposable;
 import reactor.core.publisher.Sinks;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @RequiredArgsConstructor
@@ -17,6 +20,8 @@ public class StompMessageRouter {
 
     private final ChatRoomManager chatRoomManager;
     private final SubscriptionService subscriptionService;
+
+    private final ConcurrentHashMap<String, Disposable> subscriptions = new ConcurrentHashMap<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public void handleStompMessage(Sinks.Many<String> sessionSink, WebSocketSession session, String stompMessage) {
@@ -34,8 +39,10 @@ public class StompMessageRouter {
                 }
                 break;
             case "SUBSCRIBE":
-                handleSubscribe(sessionSink, stompMessage);
+                handleSubscribe(sessionSink, session, stompMessage);
                 break;
+            case "UNSUBSCRIBE":
+                handleUnsubscribe(session, stompMessage);
             case "DISCONNECT":
                 // 연결 해제 처리 로직
                 break;
@@ -80,13 +87,33 @@ public class StompMessageRouter {
         }
     }
 
-    private void handleSubscribe(Sinks.Many<String> sessionSink, String stompMessage) {
+    private void handleSubscribe(Sinks.Many<String> sessionSink, WebSocketSession session, String stompMessage) {
         String destination = StompFrameParser.getHeader(stompMessage, "destination");
         String subscriptionId = StompFrameParser.getHeader(stompMessage, "id"); // 구독 ID 추출
+        String sessionId = session.getId();
 
         // 채팅방 메시지 구독
+        Disposable disposable = null;
         if (destination != null && destination.startsWith("/topic/message/") && subscriptionId != null) {
-            subscriptionService.subscribeRoomMessage(sessionSink, destination, subscriptionId);
+            disposable = subscriptionService.subscribeRoomMessage(sessionSink, destination, subscriptionId);
+        }
+
+        // 구독 취소를 위해 구독 정보 저장
+        if (disposable != null) {
+            String key = sessionId + ":" + subscriptionId;
+            subscriptions.put(key, disposable);
+        }
+    }
+
+    private void handleUnsubscribe(WebSocketSession session, String stompMessage) {
+        String subscriptionId = StompFrameParser.getHeader(stompMessage, "id");
+        if (subscriptionId != null) {
+            String sessionId = session.getId();
+            String key = sessionId + ":" + subscriptionId;
+            Disposable disposable = subscriptions.remove(key); // 맵에서 제거
+            if (disposable != null) {
+                disposable.dispose(); // 구독 취소
+            }
         }
     }
 }
