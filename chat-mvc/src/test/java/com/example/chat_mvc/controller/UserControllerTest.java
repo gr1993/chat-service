@@ -53,7 +53,7 @@ public class UserControllerTest {
 
         //then
         mvcAction
-                .andExpect(status().isOk())
+                .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value(errorMsg))
                 .andExpect(jsonPath("$.data").doesNotExist())
