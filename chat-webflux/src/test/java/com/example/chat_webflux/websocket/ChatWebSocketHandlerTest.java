@@ -2,11 +2,14 @@ package com.example.chat_webflux.websocket;
 
 
 import com.example.chat_webflux.dto.ChatMessageInfo;
+import com.example.chat_webflux.dto.ChatRoomInfo;
 import com.example.chat_webflux.dto.SendMessageInfo;
 import com.example.chat_webflux.entity.MessageType;
+import com.example.chat_webflux.service.ChatRoomService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
@@ -29,6 +32,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @Slf4j
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ChatWebSocketHandlerTest {
+
+    @Autowired
+    private ChatRoomService chatRoomService;
+
     @LocalServerPort
     private int port;
 
@@ -78,6 +85,31 @@ public class ChatWebSocketHandlerTest {
         assertTrue(StringUtils.hasText(chatMessageInfo.getSendDt()));
         assertEquals(MessageType.user.name(), chatMessageInfo.getType());
     }
+
+    /**
+     * 채팅방 생성 구독 통합 테스트
+     */
+    @Test
+    void createRoom_성공() throws Exception {
+        // given
+        StompSession session = connectWebSocket();
+        BlockingQueue<ChatRoomInfo> blockingQueue = getWebSocketQueue(
+                session,
+                "/topic/rooms",
+                ChatRoomInfo.class
+        );
+
+        // when
+        String roomName = "park";
+        chatRoomService.createRoom(roomName).block();
+
+        // then
+        ChatRoomInfo chatRoomInfo = blockingQueue.poll(5, TimeUnit.SECONDS);
+        log.info("받은 메세지 객체 : {}", chatRoomInfo);
+        assertNotNull(chatRoomInfo);
+        assertEquals(roomName, chatRoomInfo.getRoomName());
+    }
+
 
     private StompSession connectWebSocket() {
         try {

@@ -24,9 +24,23 @@ public class SubscriptionService {
 
         // 해당 채팅방의 Sinks.Many를 가져오거나 없으면 새로 생성
         Sinks.Many<String> roomSink = chatRoomManager.getRoomSink(roomId.toString());
+        return subscribe(roomSink, sessionSink, destination, subscriptionId);
+    }
 
+    /**
+     * 채팅방 생성 구독
+     */
+    public Disposable subscribeRoomCreate(Sinks.Many<String> sessionSink, String destination, String subscriptionId) {
+        Sinks.Many<String> serverSinks = chatRoomManager.getChatServerSinks();
+        return subscribe(serverSinks, sessionSink, destination, subscriptionId);
+    }
+
+    private Disposable subscribe(Sinks.Many<String> multSink,
+                                 Sinks.Many<String> sessionSink,
+                                 String destination,
+                                 String subscriptionId) {
         // 이 Flux를 현재 세션의 sessionSink에 구독
-        return roomSink.asFlux()
+        return multSink.asFlux()
                 .map(json -> {
                     return StompFrameParser.createStompMessageFrame(destination, subscriptionId, json); // 이제 STOMP 프레임이 된 문자열을 sessionSink에 발행
                 })

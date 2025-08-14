@@ -92,10 +92,18 @@ public class StompMessageRouter {
         String subscriptionId = StompFrameParser.getHeader(stompMessage, "id"); // 구독 ID 추출
         String sessionId = session.getId();
 
+        if (destination == null || subscriptionId == null) {
+            return;
+        }
+
         // 채팅방 메시지 구독
         Disposable disposable = null;
-        if (destination != null && destination.startsWith("/topic/message/") && subscriptionId != null) {
+        if (destination.startsWith("/topic/message/")) {
             disposable = subscriptionService.subscribeRoomMessage(sessionSink, destination, subscriptionId);
+        }
+        // 채팅방 생성 구독
+        else if (destination.startsWith("/topic/rooms")) {
+            disposable = subscriptionService.subscribeRoomCreate(sessionSink, destination, subscriptionId);
         }
 
         // 구독 취소를 위해 구독 정보 저장
