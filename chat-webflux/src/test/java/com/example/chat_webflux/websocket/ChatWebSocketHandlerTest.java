@@ -5,7 +5,9 @@ import com.example.chat_webflux.dto.ChatMessageInfo;
 import com.example.chat_webflux.dto.ChatRoomInfo;
 import com.example.chat_webflux.dto.SendMessageInfo;
 import com.example.chat_webflux.entity.MessageType;
+import com.example.chat_webflux.repository.UserRepository;
 import com.example.chat_webflux.service.ChatRoomService;
+import com.example.chat_webflux.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +27,7 @@ import org.springframework.web.socket.messaging.WebSocketStompClient;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.function.BiFunction;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -37,6 +40,12 @@ public class ChatWebSocketHandlerTest {
 
     @Autowired
     private ChatRoomService chatRoomService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @LocalServerPort
     private int port;
@@ -59,38 +68,16 @@ public class ChatWebSocketHandlerTest {
      */
     @Test
     void sendMessage_성공() throws Exception {
-        // given
-        String roomName = "park";
-        chatRoomService.createRoom(roomName).block();
-        List<ChatRoomInfo> roomInfoList = chatRoomService.getRoomList().block();
-
-        Long roomId = roomInfoList.get(0).getRoomId();
-        String userId = "lim";
-        String message = "안녕하세요~";
-        BlockingQueue<ChatMessageInfo> blockingQueue = getWebSocketQueue(
-                session,
-                "/topic/message/" + roomId,
-                ChatMessageInfo.class
-        );
-
-        // when
-        SendMessageInfo messageInfo = new SendMessageInfo(
-                roomId,
-                userId,
-                message
-        );
-        session.send("/api/messages", messageInfo);
-
-        // then
-        ChatMessageInfo chatMessageInfo = blockingQueue.poll(5, TimeUnit.SECONDS);
-        log.info("받은 메세지 객체 : {}", chatMessageInfo);
-        assertNotNull(chatMessageInfo);
-        assertNotNull(chatMessageInfo.getMessageId());
-        assertEquals(userId, chatMessageInfo.getSenderId());
-        assertTrue(StringUtils.hasText(chatMessageInfo.getMessage()));
-        assertEquals(message, chatMessageInfo.getMessage());
-        assertTrue(StringUtils.hasText(chatMessageInfo.getSendDt()));
-        assertEquals(MessageType.user.name(), chatMessageInfo.getType());
+        roomWebSocketSubscribeTest(true, (roomId, userId) -> {
+            String message = "안녕하세요~";
+            SendMessageInfo messageInfo = new SendMessageInfo(
+                    roomId,
+                    userId,
+                    message
+            );
+            session.send("/api/messages", messageInfo);
+            return message;
+        });
     }
 
     /**
@@ -116,6 +103,28 @@ public class ChatWebSocketHandlerTest {
         assertEquals(roomName, chatRoomInfo.getRoomName());
     }
 
+    /**
+     * 채팅방 입장 메시지 구독 통합 테스트
+     */
+    @Test
+    void enterRoom_성공() throws Exception {
+        roomWebSocketSubscribeTest(false, (roomId, userId) -> {
+            chatRoomService.enterRoom(roomId, userId).block();
+            return null;
+        });
+    }
+
+    /**
+     * 채팅방 퇴장 메시지 구독 통합 테스트
+     */
+    @Test
+    void exitRoom_성공() throws Exception {
+        roomWebSocketSubscribeTest(false, (roomId, userId) -> {
+            chatRoomService.exitRoom(roomId, userId).block();
+            return null;
+        });
+    }
+    
 
     private StompSession connectWebSocket() {
         try {
@@ -150,6 +159,41 @@ public class ChatWebSocketHandlerTest {
         });
 
         return blockingQueue;
+    }
+
+    private void roomWebSocketSubscribeTest(boolean isUserMsg, BiFunction<Long, String, String> function) throws Exception {
+        // given
+        String roomName = "park";
+        chatRoomService.createRoom(roomName).block();
+        List<ChatRoomInfo> roomInfoList = chatRoomService.getRoomList().block();
+
+        Long roomId = roomInfoList.get(0).getRoomId();
+        String userId = "lim";
+        if (Boolean.FALSE.equals(userRepository.existsById(userId).block())) {
+            userService.entryUser(userId).block();
+        }
+
+        BlockingQueue<ChatMessageInfo> blockingQueue = getWebSocketQueue(
+                session,
+                "/topic/message/" + roomId,
+                ChatMessageInfo.class
+        );
+
+        // when
+        String message = function.apply(roomId, userId);
+
+        // then
+        ChatMessageInfo chatMessageInfo = blockingQueue.poll(5, TimeUnit.SECONDS);
+        log.info("받은 메세지 객체 : {}", chatMessageInfo);
+        assertNotNull(chatMessageInfo);
+        assertNotNull(chatMessageInfo.getMessageId());
+        assertEquals(userId, chatMessageInfo.getSenderId());
+        assertTrue(StringUtils.hasText(chatMessageInfo.getMessage()));
+        if (StringUtils.hasText(message)) {
+            assertEquals(message, chatMessageInfo.getMessage());
+        }
+        assertTrue(StringUtils.hasText(chatMessageInfo.getSendDt()));
+        assertEquals((isUserMsg ? MessageType.user.name() : MessageType.system.name()), chatMessageInfo.getType());
     }
 
     /**
