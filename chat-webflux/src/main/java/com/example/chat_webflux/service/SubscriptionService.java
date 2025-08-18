@@ -1,7 +1,7 @@
 package com.example.chat_webflux.service;
 
 import com.example.chat_webflux.util.StompFrameParser;
-import com.example.chat_webflux.websocket.ChatRoomManager;
+import com.example.chat_webflux.common.ChatRoomManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.Disposable;

@@ -5,7 +5,7 @@ import com.example.chat_webflux.entity.ChatMessage;
 import com.example.chat_webflux.entity.ChatRoom;
 import com.example.chat_webflux.entity.MessageType;
 import com.example.chat_webflux.repository.ChatRoomRepository;
-import com.example.chat_webflux.websocket.ChatRoomManager;
+import com.example.chat_webflux.common.ChatRoomManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

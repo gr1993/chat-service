@@ -5,7 +5,7 @@ import com.example.chat_webflux.entity.ChatRoom;
 import com.example.chat_webflux.entity.User;
 import com.example.chat_webflux.repository.ChatRoomRepository;
 import com.example.chat_webflux.repository.UserRepository;
-import com.example.chat_webflux.websocket.ChatRoomManager;
+import com.example.chat_webflux.common.ChatRoomManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

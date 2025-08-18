@@ -1,4 +1,4 @@
-package com.example.chat_webflux.websocket;
+package com.example.chat_webflux.common;
 
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Sinks;
