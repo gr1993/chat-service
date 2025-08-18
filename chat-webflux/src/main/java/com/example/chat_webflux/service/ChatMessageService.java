@@ -36,6 +36,13 @@ public class ChatMessageService {
                 });
     }
 
+    public Mono<Void> broadcastSystemMsg(ChatRoom room, String userId, String message) {
+        ChatMessage chatMessage = createMsg(room, userId, message);
+
+        // 채팅방에 새 메세지를 구독자들에게 알림
+        return broadcastMsg(room.getId(), chatMessage, true);
+    }
+
     private ChatMessage createMsg(ChatRoom room, String userId, String message) {
         long messageId = idGenerator.incrementAndGet();
 
