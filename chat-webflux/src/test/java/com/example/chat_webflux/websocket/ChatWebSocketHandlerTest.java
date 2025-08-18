@@ -7,6 +7,7 @@ import com.example.chat_webflux.dto.SendMessageInfo;
 import com.example.chat_webflux.entity.MessageType;
 import com.example.chat_webflux.service.ChatRoomService;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,14 +41,16 @@ public class ChatWebSocketHandlerTest {
     private int port;
 
     private WebSocketStompClient stompClient;
+    private StompSession session;
     private String URL;
 
     @BeforeEach
     public void setup() {
         stompClient = new WebSocketStompClient(new StandardWebSocketClient());
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
-
         URL = "ws://localhost:" + port + "/ws";
+
+        session = connectWebSocket();
     }
 
     /**
@@ -59,7 +62,6 @@ public class ChatWebSocketHandlerTest {
         Long roomId = 1L;
         String userId = "lim";
         String message = "안녕하세요~";
-        StompSession session = connectWebSocket();
         BlockingQueue<ChatMessageInfo> blockingQueue = getWebSocketQueue(
                 session,
                 "/topic/message/" + roomId,
@@ -92,7 +94,6 @@ public class ChatWebSocketHandlerTest {
     @Test
     void createRoom_성공() throws Exception {
         // given
-        StompSession session = connectWebSocket();
         BlockingQueue<ChatRoomInfo> blockingQueue = getWebSocketQueue(
                 session,
                 "/topic/rooms",
@@ -144,5 +145,15 @@ public class ChatWebSocketHandlerTest {
         });
 
         return blockingQueue;
+    }
+
+    /**
+     * Sink 정리
+     */
+    @AfterEach
+    void tearDown() {
+        if (session != null) {
+            session.disconnect();
+        }
     }
 }

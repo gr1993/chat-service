@@ -14,7 +14,7 @@ import reactor.core.publisher.Sinks;
 public class ChatWebSocketHandler implements WebSocketHandler {
 
     private final StompMessageRouter stompMessageRouter;
-
+    private final ChatSessionManager chatSessionManager;
 
     /**
      * 웹소켓 연결 이벤트 처리
@@ -25,16 +25,14 @@ public class ChatWebSocketHandler implements WebSocketHandler {
     public Mono<Void> handle(WebSocketSession session) {
         // 각 세션마다 메시지를 받아 발행할 Sinks를 생성
         // 이 Sinks는 오직 현재 연결된 클라이언트(세션)에게만 메시지를 보낸다.
-        Sinks.Many<String> sessionSink = Sinks.many().unicast().onBackpressureBuffer();
+        String sessionId = session.getId();
+        Sinks.Many<String> sessionSink = chatSessionManager.createSessionSink(sessionId);
 
         // 1. 메시지 수신 스트림 (클라이언트 -> 서버)
         Mono<Void> input = session.receive()
                 .map(WebSocketMessage::getPayloadAsText)
                 .doOnNext(message -> stompMessageRouter.handleStompMessage(sessionSink, session, message))
-                .doFinally(signal -> {
-                    // 세션이 종료되면 해당 세션의 구독을 해지
-                    sessionSink.tryEmitComplete();
-                })
+                .doFinally(signal -> chatSessionManager.completeSessionSink(sessionId))
                 .then();
 
         // 2. 메시지 송신 스트림 (서버 -> 클라이언트)
