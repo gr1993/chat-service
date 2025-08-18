@@ -23,6 +23,7 @@ import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.concurrent.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -59,7 +60,11 @@ public class ChatWebSocketHandlerTest {
     @Test
     void sendMessage_성공() throws Exception {
         // given
-        Long roomId = 1L;
+        String roomName = "park";
+        chatRoomService.createRoom(roomName).block();
+        List<ChatRoomInfo> roomInfoList = chatRoomService.getRoomList().block();
+
+        Long roomId = roomInfoList.get(0).getRoomId();
         String userId = "lim";
         String message = "안녕하세요~";
         BlockingQueue<ChatMessageInfo> blockingQueue = getWebSocketQueue(

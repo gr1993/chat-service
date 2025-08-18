@@ -1,8 +1,7 @@
 package com.example.chat_webflux.websocket;
 
-import com.example.chat_webflux.dto.ChatMessageInfo;
 import com.example.chat_webflux.dto.SendMessageInfo;
-import com.example.chat_webflux.entity.MessageType;
+import com.example.chat_webflux.service.ChatMessageService;
 import com.example.chat_webflux.service.SubscriptionService;
 import com.example.chat_webflux.util.StompFrameParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class StompMessageRouter {
 
-    private final ChatRoomManager chatRoomManager;
+    private final ChatMessageService chatMessageService;
     private final SubscriptionService subscriptionService;
 
     private final ConcurrentHashMap<String, Disposable> subscriptions = new ConcurrentHashMap<>();
@@ -71,19 +70,10 @@ public class StompMessageRouter {
         // 메세지 전송
         if (destination != null && destination.startsWith("/api/messages") && jsonBody != null) {
             SendMessageInfo sendMessageInfo = objectMapper.readValue(jsonBody, SendMessageInfo.class);
-            Long roomId = sendMessageInfo.getRoomId();
-
-            // 해당 채팅방의 Sinks.Many를 가져오거나 없으면 새로 생성
-            Sinks.Many<String> roomSink = chatRoomManager.getRoomSink(roomId.toString());
 
             // 메시지 발행 (해당 방의 구독자들에게만 전달)
-            ChatMessageInfo chatMessageInfo = new ChatMessageInfo();
-            chatMessageInfo.setMessageId(1L);
-            chatMessageInfo.setType(MessageType.user.name());
-            chatMessageInfo.setSenderId("lim");
-            chatMessageInfo.setSendDt("2025-08-13T15:37:40");
-            chatMessageInfo.setMessage(sendMessageInfo.getMessage());
-            roomSink.tryEmitNext(objectMapper.writeValueAsString(chatMessageInfo));
+            chatMessageService.sendMessageToRoom(sendMessageInfo.getRoomId(), sendMessageInfo.getUserId(), sendMessageInfo.getMessage())
+                    .subscribe();
         }
     }
 
