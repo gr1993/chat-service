@@ -1,27 +1,50 @@
 import SockJS from "sockjs-client";
-import { CompatClient, Stomp } from "@stomp/stompjs";
+import { CompatClient, Stomp, type Frame } from "@stomp/stompjs";
 
 const SOCKET_URL = import.meta.env.VITE_API_URL + "/ws";
+const USE_SOCKJS = import.meta.env.VITE_USE_SOCKJS === "true";
+
 let sharedClient: CompatClient | null = null;
 
 export function connectWebSocket(callback?: (client: CompatClient, sessionId: string) => void) {
   if (sharedClient) return sharedClient;
 
-  const socket = new SockJS(SOCKET_URL);
-  const client = Stomp.over(socket);
+  let client: CompatClient;
 
-  client.connect({}, () => {
-    console.log("STOMP 연결됨");
-    sharedClient = client;
+  if (USE_SOCKJS) {
+    const socket = new SockJS(SOCKET_URL);
+    client = Stomp.over(socket);
 
-    // SockJS 객체에서 직접 세션 ID를 추출
-    const url = (socket as any)._transport.url;
-    const parts = url.split('/');
-    const extractedSessionId = parts[parts.length - 2];
+    client.connect({}, () => {
+      console.log("STOMP 연결됨 (SockJS 사용)");
+      sharedClient = client;
 
-    callback?.(client, extractedSessionId);
-  });
+      // SockJS에서 세션ID 추출
+      const url = (socket as any)._transport.url;
+      const parts = url.split('/');
+      const extractedSessionId = parts[parts.length - 2];
 
+      callback?.(client, extractedSessionId);
+    });
+
+  } else {
+    // WebSocket URL은 ws:// 또는 wss:// 로 시작해야 함
+    // 예: http://localhost:8080 → ws://localhost:8080
+    const wsUrl = SOCKET_URL.replace(/^http/, "ws");
+    const socket = new WebSocket(wsUrl);
+    client = Stomp.over(socket);
+    client.debug = () => {}; // 디버그 로그 끄기
+
+    client.connect({}, (frame: Frame) => {
+      console.log("STOMP 연결됨 (순수 WebSocket 사용)");
+      sharedClient = client;
+
+      // 순수 WebSocket에서는 SockJS처럼 세션ID 직접 추출 불가
+      // WebFlux 서버에서 직접 헤더에 추가해 보내도록 구현
+      const sessionId = frame.headers.session || '';
+      callback?.(client, sessionId);
+    });
+  }
   return client;
 }
 
