@@ -36,8 +36,8 @@ public class ChatHttpClientService {
     /**
      * 채팅방 생성
      */
-    public Long createRoom(String roomName) {
-        login("roomCreator");
+    public Long createRoom(String roomName, String creatorId) {
+        login(creatorId);
 
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("name", roomName);

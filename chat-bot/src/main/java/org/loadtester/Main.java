@@ -31,7 +31,7 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            roomId = chatClient.createRoom(ROOM_NAME);
+            roomId = chatClient.createRoom(ROOM_NAME, config.getUserIdPrefix() + "RoomCreator");
 
             int userCount = config.getUserCount();
             userCompletionLatch = new CountDownLatch(userCount);
