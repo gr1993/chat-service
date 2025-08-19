@@ -7,6 +7,7 @@ import com.example.chat_webflux.entity.MessageType;
 import com.example.chat_webflux.repository.ChatRoomRepository;
 import com.example.chat_webflux.common.ChatRoomManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -25,6 +26,7 @@ public class ChatMessageService {
     private final AtomicLong idGenerator = new AtomicLong(0);
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    @Timed("websocket_message_seconds")
     public Mono<Void> sendMessageToRoom(Long roomId, String userId, String message) {
         return chatRoomRepository.findById(roomId)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("존재하지 않은 채팅방입니다.")))
