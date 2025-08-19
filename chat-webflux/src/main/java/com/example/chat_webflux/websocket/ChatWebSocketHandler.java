@@ -4,7 +4,10 @@ import com.example.chat_webflux.common.ChatSessionManager;
 import com.example.chat_webflux.common.RoomUserSessionManager;
 import com.example.chat_webflux.dto.WebSocketRoomUser;
 import com.example.chat_webflux.service.ChatRoomService;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.socket.WebSocketHandler;
 import org.springframework.web.reactive.socket.WebSocketMessage;
@@ -57,7 +60,18 @@ public class ChatWebSocketHandler implements WebSocketHandler {
         Flux<WebSocketMessage> output = sessionSink.asFlux()
                 .map(session::textMessage);
 
+        // 웹소켓 연결 커스텀 지표 수집
+        activeConnections.incrementAndGet();
+
         // input과 output을 합쳐 하나의 리액티브 체인으로 생성
         return session.send(output).and(input);
+    }
+
+    /**
+     * 커스텀 지표 노출
+     */
+    @Bean
+    public MeterRegistryCustomizer<MeterRegistry> meterRegistryCustomizer() {
+        return meterRegistry -> meterRegistry.gauge("chat_app_active_connections", activeConnections);
     }
 }
