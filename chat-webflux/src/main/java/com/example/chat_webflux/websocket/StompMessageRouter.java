@@ -28,7 +28,7 @@ public class StompMessageRouter {
 
         switch (command) {
             case "CONNECT":
-                handleConnect(sessionSink);
+                handleConnect(sessionSink, session.getId());
                 break;
             case "SEND":
                 try {
@@ -54,10 +54,11 @@ public class StompMessageRouter {
         }
     }
 
-    private void handleConnect(Sinks.Many<String> sessionSink) {
+    private void handleConnect(Sinks.Many<String> sessionSink, String sessionId) {
         String connectedFrame = "CONNECTED\n" +
                 "version:1.2\n" +
                 "heart-beat:0,0\n" +
+                "session:" + sessionId + "\n" +
                 "\n\0";
 
         sessionSink.tryEmitNext(connectedFrame);
