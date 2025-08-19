@@ -3,6 +3,7 @@
 Spring WebFlux 기반에서 web과 websocket 의존성을 사용하여 비동기 논블로킹 채팅 서버 API를 제공하는 프로젝트이다.
 도커 컨테이너 구동 및 리소스 제한은 mvc와 동일하게 구성하여 진행하였다.
 
+
 ### 백엔드 기술
 * Spring Boot 3.5.4 (JDK 17)
 * spring-boot-starter-webflux : 이 의존성에 WebSocket도 포함되어 있음
@@ -24,3 +25,17 @@ SockJS를 사용해 클라이언트가 연동을 시도하고 있었다. SockJS�
 도와주는 라이브러리이며 사전에 연결정보를 체크하기 위해 /ws/info 엔드포인트로 검증하고 연동하는 작업을 진행한다.  
 그러나 STOMP와 마찬가지로 WebFlux에서 기본적으로 SockJS를 지원하는 라이브러리가 없을 뿐더러 구현이 복잡하기 때문에  
 클라이언트가 WebFlux 서버에게는 SockJS 방식으로 연결하지 않는 것으로 결정하였다.
+
+
+### 도커 환경 구성
+Spring MVC에서 구축한 방식 그대로 사용하였다. 자세한 내용은 mvc 프로젝트 README를 참고하면 된다.
+
+#### 컨테이너 실행 명령어
+```shell
+# 재빌드 후 실행 명령어
+docker-compose up --build -d
+
+# 재실행 명령어
+# 명령어 파이프 (linux=&&, Window cmd=&, Window PowerShell=;)
+docker-compose down && docker-compose up -d
+```
