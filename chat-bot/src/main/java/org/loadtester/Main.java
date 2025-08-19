@@ -7,8 +7,11 @@ import org.loadtester.dto.LoadTestConfig;
 import org.loadtester.dto.SendMessageInfo;
 import org.loadtester.service.ChatHttpClientService;
 import org.loadtester.service.ChatWebSocketClientService;
+import org.loadtester.util.Logger;
 import org.loadtester.util.MessageUtil;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -24,6 +27,7 @@ public class Main {
     private static CountDownLatch userCompletionLatch;
 
     private final static AtomicLong totalMessageCount = new AtomicLong();
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static void main(String[] args) {
         try {
@@ -46,8 +50,13 @@ public class Main {
             }
 
             userCompletionLatch.await();
-            System.out.println("모든 사용자 시뮬레이션이 완료되어 메인 함수를 종료합니다.");
-            System.out.println("총 메세지 전송 갯수 : " + totalMessageCount.get() + "개");
+
+            String nowDateTime = LocalDateTime.now().format(formatter);
+            Logger.init("test-result.txt");
+            Logger.log("테스트 완료 시각 : " + nowDateTime);
+            Logger.log("모든 사용자 시뮬레이션이 완료되어 메인 함수를 종료합니다.");
+            Logger.log("총 메세지 전송 갯수 : " + totalMessageCount.get() + "개");
+            Logger.close();
 
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -94,20 +103,25 @@ public class Main {
                     } catch (Exception e) {
                         System.err.println("메시지 전송 중 오류 발생. 사용자 " + userId + ": " + e.getMessage());
                     } finally {
-                        // 채팅방 퇴장 API 호출
-                        chatClient.exitRoom(roomId, userId);
+                        try {
+                            // 채팅방 퇴장 API 호출
+                            chatClient.exitRoom(roomId, userId);
+                        } catch (Exception ignored) {}
 
-                        if (stompSession.isConnected()) {
-                            stompSession.disconnect();
-                            System.out.println("웹소켓 세션이 종료되었습니다.");
+                        try {
+                            if (stompSession.isConnected()) {
+                                stompSession.disconnect();
+                                System.out.println("웹소켓 세션이 종료되었습니다.");
+                            }
+                        } catch (Exception ignored) {}
 
-                            userCompletionLatch.countDown();
-                        }
+                        userCompletionLatch.countDown();
                     }
                 }).start();
             }));
         } catch (Exception ex) {
             ex.printStackTrace();
+            userCompletionLatch.countDown();
         }
     }
 }
