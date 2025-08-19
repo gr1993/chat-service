@@ -40,18 +40,20 @@ const ChatView: React.FC = () => {
   });
 
   useStrictEffect(() => {
-    setHeaderInfo(true, currentRoom?.name ?? '');
+    if (wsSessionId) {
+      setHeaderInfo(true, currentRoom?.name ?? '');
 
-    // 새로고침 시 웹소켓 연결 시간을 기다리고 API 호출
-    setTimeout(() => {
-      // 채팅방 입장 API
-      if (currentRoom) {
-        handleApiResponse(
-          enterRoom(wsSessionId, currentRoom.id, userId),
-          () => {}
-        );
-      }
-    }, 100);
+      // 새로고침 시 웹소켓 연결 시간을 기다리고 API 호출
+      setTimeout(() => {
+        // 채팅방 입장 API
+        if (currentRoom) {
+          handleApiResponse(
+            enterRoom(wsSessionId, currentRoom.id, userId),
+            () => {}
+          );
+        }
+      }, 100);
+    }
 
     return () => {
       // 채팅방 퇴장 API
@@ -62,7 +64,7 @@ const ChatView: React.FC = () => {
         );
       }
     }
-  }, []);
+  }, [wsSessionId]);
 
   // 새 메시지가 올 때마다 자동 스크롤
   useEffect(() => {
