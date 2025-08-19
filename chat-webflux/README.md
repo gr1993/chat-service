@@ -7,7 +7,8 @@ Spring WebFlux 기반에서 web과 websocket 의존성을 사용하여 비동기
 * Spring Boot 3.5.4 (JDK 17)
 * spring-boot-starter-webflux : 이 의존성에 WebSocket도 포함되어 있음
 * io.projectreactor:reactor-test : reactor 환경 전용 테스트 의존성
-
+* spring-boot-starter-actuator : 모니터링에 필요하며 Micrometer를 포함한 모듈
+* micrometer-registry-prometheus : MeterRegistry 프로메테우스 구현체
 
 ### Spring WebFlux 환경에서 STOMP
 Spring WebFlux에서 STOMP를 쓰는 건 MVC에서처럼 쉽게 되지 않는다. 기본적으로 제공하는 API도 없기 때문이다.  

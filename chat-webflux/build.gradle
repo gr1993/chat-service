@@ -21,6 +21,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+
 	// 웹소켓 테스트를 위해 아래 의존성이 필요
 	testImplementation 'org.springframework:spring-messaging'
 	testImplementation 'org.springframework:spring-websocket'
