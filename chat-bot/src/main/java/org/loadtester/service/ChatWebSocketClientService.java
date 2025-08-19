@@ -25,8 +25,7 @@ public class ChatWebSocketClientService {
     public ChatWebSocketClientService(String url) {
         this.url = url;
 
-        stompClient = new WebSocketStompClient(new SockJsClient(
-                Collections.singletonList(new WebSocketTransport(new StandardWebSocketClient()))));
+        stompClient = new WebSocketStompClient(new StandardWebSocketClient());
         stompClient.setMessageConverter(new MappingJackson2MessageConverter());
     }
 
