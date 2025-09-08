@@ -8,10 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.socket.WebSocketSession;
-import reactor.core.Disposable;
 import reactor.core.publisher.Sinks;
-
-import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 @RequiredArgsConstructor
@@ -20,7 +17,6 @@ public class StompMessageRouter {
     private final ChatMessageService chatMessageService;
     private final SubscriptionService subscriptionService;
 
-    private final ConcurrentHashMap<String, Disposable> subscriptions = new ConcurrentHashMap<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public void handleStompMessage(Sinks.Many<String> sessionSink, WebSocketSession session, String stompMessage) {
@@ -88,19 +84,12 @@ public class StompMessageRouter {
         }
 
         // 채팅방 메시지 구독
-        Disposable disposable = null;
         if (destination.startsWith("/topic/message/")) {
-            disposable = subscriptionService.subscribeRoomMessage(sessionSink, destination, subscriptionId);
+            subscriptionService.subscribeRoomMessage(sessionSink, destination, sessionId, subscriptionId);
         }
         // 채팅방 생성 구독
         else if (destination.startsWith("/topic/rooms")) {
-            disposable = subscriptionService.subscribeRoomCreate(sessionSink, destination, subscriptionId);
-        }
-
-        // 구독 취소를 위해 구독 정보 저장
-        if (disposable != null) {
-            String key = sessionId + ":" + subscriptionId;
-            subscriptions.put(key, disposable);
+            subscriptionService.subscribeRoomCreate(sessionSink, destination, sessionId, subscriptionId);
         }
     }
 
@@ -108,11 +97,7 @@ public class StompMessageRouter {
         String subscriptionId = StompFrameParser.getHeader(stompMessage, "id");
         if (subscriptionId != null) {
             String sessionId = session.getId();
-            String key = sessionId + ":" + subscriptionId;
-            Disposable disposable = subscriptions.remove(key); // 맵에서 제거
-            if (disposable != null) {
-                disposable.dispose(); // 구독 취소
-            }
+            subscriptionService.unSubscribe(sessionId, subscriptionId);
         }
     }
 }
