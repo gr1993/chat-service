@@ -30,7 +30,7 @@ public class SubscriptionService {
         String roomId = destination.substring("/topic/message/".length());
 
         // 해당 채팅방의 Sinks.Many를 가져오거나 없으면 새로 생성
-        Sinks.Many<String> roomSink = chatRoomManager.getRoomSink(roomId.toString());
+        Sinks.Many<String> roomSink = chatRoomManager.getRoomSink(roomId);
         subscribe(roomSink, sessionSink, destination, sessionId, subscriptionId);
     }
 
