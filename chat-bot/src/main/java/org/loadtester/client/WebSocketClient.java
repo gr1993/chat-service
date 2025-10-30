@@ -1,4 +1,4 @@
-package org.loadtester.service;
+package org.loadtester.client;
 
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -7,22 +7,19 @@ import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
-import org.springframework.web.socket.sockjs.client.SockJsClient;
-import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
 import java.lang.reflect.Type;
-import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
-public class ChatWebSocketClientService {
+public class WebSocketClient {
 
     private final WebSocketStompClient stompClient;
     private final String url;
 
-    public ChatWebSocketClientService(String url) {
+    public WebSocketClient(String url) {
         this.url = url;
 
         stompClient = new WebSocketStompClient(new StandardWebSocketClient());

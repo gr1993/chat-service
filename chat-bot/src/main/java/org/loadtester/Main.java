@@ -5,8 +5,8 @@ import org.loadtester.dto.ChatMessageInfo;
 import org.loadtester.dto.ChatRoomInfo;
 import org.loadtester.dto.LoadTestConfig;
 import org.loadtester.dto.SendMessageInfo;
-import org.loadtester.service.ChatHttpClientService;
-import org.loadtester.service.ChatWebSocketClientService;
+import org.loadtester.service.ChatService;
+import org.loadtester.client.WebSocketClient;
 import org.loadtester.util.Logger;
 import org.loadtester.util.MessageUtil;
 
@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class Main {
 
     private final static LoadTestConfig config = ConfigLoader.load("config.json");
-    private final static ChatHttpClientService chatClient = new ChatHttpClientService(config);
+    private final static ChatService chatClient = new ChatService(config);
 
     private final static String ROOM_NAME = "부하테스트방";
     private static Long roomId = 0L;
@@ -67,13 +67,13 @@ public class Main {
         try {
             chatClient.login(userId);
 
-            ChatWebSocketClientService chatWebSocketClient = new ChatWebSocketClientService(config.getWebSocketEndpoint());
+            WebSocketClient chatWebSocketClient = new WebSocketClient(config.getWebSocketEndpoint());
             chatWebSocketClient.connectWebSocket((stompSession -> {
                 // 채팅방 생성 구독
-                ChatWebSocketClientService.subscribeStomp(stompSession, "/topic/rooms", ChatRoomInfo.class);
+                WebSocketClient.subscribeStomp(stompSession, "/topic/rooms", ChatRoomInfo.class);
 
                 // 채팅방 메세지 구독
-                ChatWebSocketClientService.subscribeStomp(stompSession, "/topic/message/" + roomId, ChatMessageInfo.class);
+                WebSocketClient.subscribeStomp(stompSession, "/topic/message/" + roomId, ChatMessageInfo.class);
                 
                 // 채팅방 입장 API 요청
                 chatClient.enterRoom(roomId, userId, stompSession.getSessionId());

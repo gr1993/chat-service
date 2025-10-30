@@ -3,6 +3,7 @@ package org.loadtester.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.loadtester.client.HttpClient;
 import org.loadtester.dto.ApiResponse;
 import org.loadtester.dto.ChatRoomInfo;
 import org.loadtester.dto.LoadTestConfig;
@@ -13,13 +14,13 @@ import org.springframework.util.MultiValueMap;
 
 import java.util.List;
 
-public class ChatHttpClientService {
+public class ChatService {
     private final LoadTestConfig config;
-    private final HttpClientService httpClientService = new HttpClientService();
+    private final HttpClient httpClientService = new HttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpHeaders headers;
 
-    public ChatHttpClientService(LoadTestConfig config) {
+    public ChatService(LoadTestConfig config) {
         this.config = config;
 
         headers = new HttpHeaders();
