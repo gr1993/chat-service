@@ -18,7 +18,7 @@ RUN gradle clean build --no-daemon
 
 
 # ----------- STEP 2: Run Stage -----------
-FROM openjdk:17-jdk-alpine
+FROM bellsoft/liberica-runtime-container:jdk-17-musl
 
 WORKDIR /app
 
