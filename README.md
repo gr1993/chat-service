@@ -1,6 +1,7 @@
 # chat-service
-동일한 채팅 서비스를 Spring MVC와 WebFlux 방식으로 각각 구현하여, 성능 및 처리 방식의 차이를 비교한다.
-또한, 성능 테스트를 통해 JVM의 주요 리소스 사용 현황을 자세히 파악하고, 중요한 지표들을 분석한다.
+동일한 채팅 서비스를 Spring MVC(Servlet 기반, 동기/블로킹)와 Spring WebFlux(리액티브 기반, 비동기/논블로킹)  
+방식으로 각각 구현하여, 성능 및 처리 방식의 차이를 비교한다.  
+또한, 성능 테스트를 통해 JVM의 주요 리소스 사용 현황을 자세히 파악하고, 중요한 지표들을 분석한다.  
 
 ### 채팅 웹 클라이언트 화면 시연
 ![chat-app1](./docs/chat-app1.gif)
@@ -8,8 +9,9 @@
 
 
 ## 프로젝트 개요
-WebSocket 기반의 간단한 채팅 기능을 두 가지 방식(MVC와 WebFlux)으로 구현하였다. 이후 가상의 클라이언트인  
-chat-bot을 통해 시뮬레이션 부하를 발생시키고 Prometheus, Grafana 등 모니터링 도구로 성능 및 안정성을 측정한다.  
+WebSocket 기반의 간단한 채팅 기능을 두 가지 방식(MVC: 동기/블로킹, WebFlux: 비동기/논블로킹)으로 구현하였다.  
+이후 가상의 클라이언트인 chat-bot을 통해 시뮬레이션 부하를 발생시키고 Prometheus, Grafana 등 모니터링 도구로  
+성능 및 안정성을 측정한다.  
 
 모니터링하고자 하는 지표는 아래와 같다.  
 
@@ -28,9 +30,9 @@ chat-bot을 통해 시뮬레이션 부하를 발생시키고 Prometheus, Grafana
 [chat-bot]
     └── 시뮬레이션용 부하 테스트 봇 (채팅 생성기)
 [chat-mvc]
-    └── Spring Boot MVC + Tomcat 기반 채팅 서버
+    └── Spring Boot MVC + Tomcat 기반 채팅 서버 (동기/블로킹)
 [chat-webflux]
-    └── Spring Boot WebFlux + Netty 기반 채팅 서버
+    └── Spring Boot WebFlux + Netty 기반 채팅 서버 (비동기/논블로킹)
 [chat-monitoring]
     └── Prometheus, Grafana 등 모니터링 설정
 ```
